@@ -1,3 +1,6 @@
+"""
+Stores configuration information for client and handles operations to access or mutate them.
+"""
 import argparse
 
 from client.file_utils import load_settings_from_file, write_settings_to_file
@@ -5,12 +8,13 @@ from client.file_utils import load_settings_from_file, write_settings_to_file
 SETTINGS_FILENAME = "settings.json"
 LOG_FILENAME = "client.log"
 
-settings = {
+default_settings = {
     'log_file': LOG_FILENAME,
     'verbose': False,
     'server_ip': '127.0.0.1',
     'server_port': 9393,
 }
+
 
 def get_settings() -> dict:
     """
@@ -23,12 +27,17 @@ def get_settings() -> dict:
     parser = argparse.ArgumentParser(description='Venora client')
 
     # Get command line args, otherwise use default settings
-    parser.add_argument('--log-file', type=str, default=None, help='Filename for output logs')
-    parser.add_argument('--server_ip', type=str, default=None, help='Server IP address')
-    parser.add_argument('--server_port', type=int, default=None, help='Server port number')
-    parser.add_argument('-v', '--verbose', action='store_true', default=None, help='Enable verbose mode')
+    parser.add_argument('--log-file', type=str, default=None,
+                        help='Filename for output logs')
+    parser.add_argument('--server_ip', type=str,
+                        default=None, help='Server IP address')
+    parser.add_argument('--server_port', type=int,
+                        default=None, help='Server port number')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        default=None, help='Enable verbose mode')
 
     # Overwrite settings with specified values from SETTINGS_FILENAME
+    settings = default_settings.copy()
     f_settings = load_settings_from_file(SETTINGS_FILENAME)
     settings.update(f_settings)
 
@@ -39,6 +48,7 @@ def get_settings() -> dict:
     settings.update(arg_dict)
 
     return settings
+
 
 def save_settings(settings: dict) -> None:
     """
