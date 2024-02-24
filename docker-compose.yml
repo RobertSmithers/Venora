@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  server: &server
+    build: server/
+    env_file: ./server/server.env
+    command:
+      - ./build.sh
+    ports:
+      - 1234:9393
+    # depends_on:
+    #   - postgres
+    # restart: always
+
+  # postgres:
+  #   build: db
+
+  client:
+    build: client/
+    command: python3 ./client.py
+    network_mode: host
+    depends_on:
+      - server

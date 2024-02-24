@@ -1,0 +1,43 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Client Unit Tests",
+      "type": "shell",
+      "command": "./run_client_unit_tests.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Client Functional Tests",
+      "type": "shell",
+      "command": "./run_client_functional_tests"
+    },
+    {
+      "label": "Client Integration Tests",
+      "type": "shell",
+      "command": "./run_client_integration_tests"
+    },
+    {
+      "label": "Client Build",
+      "command": "pip install .",
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      }
+    },
+    {
+      "label": "Server Build",
+      "command": "./build.sh",
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      }
+    },
+    {
+      "label": "Build",
+      "dependsOn": ["Client Build", "Server Build"]
+    }
+  ]
+}

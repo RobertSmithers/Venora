@@ -50,3 +50,17 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Project-specific exclusions
+.cache/
+.eggs/
+*.egg-info/
+*.log
+client/__pycache__/
+*.pyc
+dist/
+
+# Secrets & Non-Public
+db/
+*.env
+hidden/
