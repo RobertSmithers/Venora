@@ -58,6 +58,9 @@ jobs:
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      - name: Build Client Package
+        run: pip install client/
+
       - name: Test with pytest
         run: |
           pytest
