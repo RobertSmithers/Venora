@@ -7,6 +7,7 @@ from client.file_utils import load_settings_from_file, write_settings_to_file
 
 SETTINGS_FILENAME = "settings.json"
 LOG_FILENAME = "client.log"
+CONNECTION_RETRY_TIME = 10  # in seconds
 
 default_settings = {
     'log_file': LOG_FILENAME,

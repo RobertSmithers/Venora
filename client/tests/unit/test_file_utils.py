@@ -33,7 +33,7 @@ def test_load_settings_from_file(file_content, expected_settings):
     """
     Test loading settings from a JSON file.
     """
-    with patch('builtins.open', mock_open(read_data=file_content)),\
+    with patch('builtins.open', mock_open(read_data=file_content)), \
             patch('os.path.exists', return_value=True):
         settings = load_settings_from_file('settings.json')
     assert settings == expected_settings
@@ -72,7 +72,8 @@ def test_write_settings_to_file(settings):
     """
     with patch('builtins.open', mock_open()) as mock_file:
         write_settings_to_file('test_settings.json', settings)
-        mock_file.assert_called_once_with('test_settings.json', 'w')
+        mock_file.assert_called_once_with(
+            'test_settings.json', 'w', encoding='utf8')
         mock_file().write.assert_called_once_with(json.dumps(settings))
         mock_file().close.assert_called_once()
 

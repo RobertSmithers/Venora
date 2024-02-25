@@ -23,7 +23,7 @@
     },
     {
       "label": "Client Build",
-      "command": "pip install .",
+      "command": "pylint $(git ls-files *.py) && pip install .",
       "options": {
         "cwd": "${workspaceFolder}/client"
       }

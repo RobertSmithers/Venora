@@ -25,7 +25,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# JQR 7.4 - read file, parse data
+
 def load_settings_from_file(filename: str) -> json:
     """
     Load settings from a JSON file.
@@ -56,7 +56,7 @@ def load_settings_from_file(filename: str) -> json:
 
     return jf
 
-# JQR 7.4 - Write to file, create new file, close open file
+
 def write_settings_to_file(filename: str, settings: dict) -> None:
     """
     Write settings to a JSON file.

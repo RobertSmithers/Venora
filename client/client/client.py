@@ -19,8 +19,11 @@ Note:
 #!/usr/bin/env python3
 
 import logging
+import time
 
-from client.config import get_settings, save_settings, LOG_FILENAME
+from client.config import get_settings, save_settings, LOG_FILENAME, CONNECTION_RETRY_TIME
+import networking.comms as net
+
 
 def run_client() -> None:
     """
@@ -39,7 +42,32 @@ def run_client() -> None:
                         level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info('Settings: %s', settings)
 
-    logging.debug("Reach out to server here and start logic")
+    ip, port = settings.get('server_ip'), settings.get('server_port')
+    if not ip or not port:
+        logging.error("Server IP or port is not set")
+        return
+    if not isinstance(port, int):
+        logging.error("Could not parse server port number")
+        return
+
+    c_sock = net.connect_to_server(ip, port)
+    # If fail to connect, retry one time after a timeout
+    if not c_sock:
+        logging.info(
+            "Failed to connect to server. Retrying in %d seconds.", CONNECTION_RETRY_TIME)
+        time.sleep(CONNECTION_RETRY_TIME)
+        c_sock = net.connect_to_server(ip, port)
+
+    # If failed a second time, abort
+    if not c_sock:
+        logging.error("Failed to connect to server")
+        return
+
+    # Connected to server
+    logging.info(f"Connected to Venora Server {ip}:{port}")
+
+    # Here I should have a shell to input commands/talk to program --> talk to server if needed
+
 
 def main():
     """
