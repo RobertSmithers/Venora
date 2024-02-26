@@ -1,8 +1,8 @@
 import pytest
 import struct
 
-from client.networking.schema import RequestType
 from client.config import USERNAME_MAX_CHARS
+from client.networking.schema import RequestType
 from client.networking.packer import (
     ResponseType,
     pack_type_register,
