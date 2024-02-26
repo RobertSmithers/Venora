@@ -84,12 +84,12 @@ def pack_type_authenticate(data: dict) -> Optional[bytes]:
     return struct.pack(f"!HH{user_len}sH{token_len}s", RequestType.AUTHENTICATE.value, user_len, username.encode(), token_len, token.encode())
 
 
-def pack_req(type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
+def pack_req(req_type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
     """
     Packs a request message based on the specified request type and data.
 
     Parameters:
-    - type (RequestType): The type of the request.
+    - req_type (RequestType): The type of the request.
     - data (Dict[str, Any]): The dictionary containing data associated with the request.
       The keys and values depend on the specific request type.
 
@@ -109,7 +109,8 @@ def pack_req(type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
 
     handler = pack_handlers.get(type)
     if handler is None:
-        logging.error("Invalid or unsupported RequestType with value %d", type)
+        logging.error(
+            "Invalid or unsupported RequestType with value %d", req_type)
         return None
 
     return handler(data)
