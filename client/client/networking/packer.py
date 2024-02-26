@@ -121,4 +121,4 @@ def pack_req(type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
 
 def unpack_response_type(response: bytes) -> ResponseType:
     """retrieves the ResponseType from the response packet"""
-    return struct.unpack('!H', response[:2])[0]
+    return ResponseType(struct.unpack('!H', response[:2])[0])
