@@ -22,7 +22,7 @@ import logging
 import time
 
 from client.config import get_settings, save_settings, LOG_FILENAME, CONNECTION_RETRY_TIME
-import networking.comms as net
+import client.networking.comms as net
 
 
 def run_client() -> None:

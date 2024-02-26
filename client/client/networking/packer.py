@@ -6,7 +6,7 @@ Note: All packer functions assume that the data is correctly formatted (ie. all 
 import struct
 import logging
 from typing import Any, Dict, Optional
-from schema import RequestType, ResponseType
+from client.networking.schema import RequestType, ResponseType
 
 # Note: I was really close to calling this packman.py
 
