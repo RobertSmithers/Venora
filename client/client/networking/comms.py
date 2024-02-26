@@ -6,8 +6,8 @@ import socket
 import logging
 from typing import Optional
 
-from schema import RequestType
-from packer import pack_req
+from client.networking.schema import RequestType
+from client.networking.packer import pack_req
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class Request:
         return pack_req(self.type, self.data)
 
 
-def connect_to_server(server_ip: str, server_port: int) -> socket.socket | None:
+def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socket]:
     """
     Connect to Venora server with provided IP address and port.
 
@@ -44,12 +44,12 @@ def connect_to_server(server_ip: str, server_port: int) -> socket.socket | None:
 
         return c_sock
     except (socket.error, TypeError) as e:
-        logger.warn(f"Error connecting to the server: {e}")
+        logger.warning(f"Error connecting to the server: {e}")
         return None
 
 
 # I think I want to specify type enumerations here for responses
-def recv_from_srv(sock: socket.socket, verbose: bool = False) -> str:
+def recv_from_srv(sock: socket.socket, verbose: bool = False) -> bytes:
     """
     Receive a message from Venora server.
 
@@ -69,8 +69,9 @@ def recv_from_srv(sock: socket.socket, verbose: bool = False) -> str:
         message = data.decode('utf-8')
 
         if verbose:
-            logger.info(f"Received message from server: {message}")
-
+            # Output to logs and console
+            logger.info(f"Received: {message}")
+            print(f"Received: {message}")
         return message
 
     except socket.error as e:
@@ -80,7 +81,7 @@ def recv_from_srv(sock: socket.socket, verbose: bool = False) -> str:
 
 
 # See above comment (enumerations for requests as well)
-def send_to_srv(sock: socket.socket, message: str, verbose: bool = False) -> None:
+def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None:
     """
     Send a message to the server.
 
@@ -93,11 +94,12 @@ def send_to_srv(sock: socket.socket, message: str, verbose: bool = False) -> Non
         None
     """
     try:
-        # Send data to the server
-        sock.sendall(message.encode('utf-8'))
+        sock.sendall(data)
 
         if verbose:
-            logger.info(f"Sent message to server: {message}")
+            # Output to logs and console
+            logger.info(f"Sent: {data}")
+            print(f"Sent: {data}")
 
     except socket.error as e:
         logger.error(f"Error sending data to the server: {e}")
