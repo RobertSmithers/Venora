@@ -1,11 +1,11 @@
 """
 Handles packing and unpacking for client requests and server responses 
-
-Note: All packer functions assume that the data is correctly formatted (ie. all necessary fields exist)
 """
 import struct
 import logging
 from typing import Any, Dict, Optional
+
+from client.config import USERNAME_MAX_CHARS
 from client.networking.schema import RequestType, ResponseType
 
 # Note: I was really close to calling this packman.py
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 ############################################
 
 
-def pack_type_register(data: dict) -> bytes:
+def pack_type_register(data: dict) -> Optional[bytes]:
     """
     packs data for the register request
 
@@ -25,17 +25,29 @@ def pack_type_register(data: dict) -> bytes:
         data (dict): Dictionary with 'username'
 
     Returns:
+        None if error, otherwise
         bytes of packed object in the form:
             unsigned short  - RequestType
             unsigned short  - Number of username bytes
             char[]          - username
     """
-    username = data["username"]
+    username = data.get("username")
+    # TODO: Refactor these into a validate_fields func, validate_username_sz
+    if not username:
+        logger.error(
+            "Failed to pack register request - no username provided")
+        return None
     user_len = len(username)
-    return struct.pack("!HH{user_len}s", RequestType.REGISTER, user_len, username)
+    if user_len > USERNAME_MAX_CHARS:
+        logger.error(
+            "Failed to pack register request - username too long (> %d chars)",
+            USERNAME_MAX_CHARS
+        )
+        return None
+    return struct.pack(f"!HH{user_len}s", RequestType.REGISTER.value, user_len, username.encode())
 
 
-def pack_type_authenticate(data: dict) -> bytes:
+def pack_type_authenticate(data: dict) -> Optional[bytes]:
     """
     packs data for the authenticate request
 
@@ -43,6 +55,7 @@ def pack_type_authenticate(data: dict) -> bytes:
         data (dict): Dictionary with 'username' and 'token'
 
     Returns:
+        None if error, otherwise
         bytes of packed object in the form:
             unsigned short  - RequestType
             unsigned short  - Number of username bytes
@@ -50,11 +63,25 @@ def pack_type_authenticate(data: dict) -> bytes:
             unsigned short  - Number of token bytes
             char[]          - token
     """
-    username = data["username"]
+    username = data.get("username")
+    if not username:
+        logger.error(
+            "Failed to pack an authenticate request - no username provided")
+        return None
     user_len = len(username)
-    token = data["token"]
+    if user_len > USERNAME_MAX_CHARS:
+        logger.error(
+            "Failed to pack register request - username too long (> %d chars)",
+            USERNAME_MAX_CHARS
+        )
+        return None
+    token = data.get("token")
+    if not token:
+        logger.error(
+            "Failed to pack an authenticate request - no token provided")
+        return None
     token_len = len(token)
-    return struct.pack(f"!HH{user_len}sH{token_len}s", RequestType.REGISTER, user_len, username, token_len, token)
+    return struct.pack(f"!HH{user_len}sH{token_len}s", RequestType.AUTHENTICATE.value, user_len, username.encode(), token_len, token.encode())
 
 
 def pack_req(type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
@@ -95,14 +122,3 @@ def pack_req(type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
 def unpack_response_type(response: bytes) -> ResponseType:
     """retrieves the ResponseType from the response packet"""
     return struct.unpack('!H', response[:2])[0]
-
-    # # Unpack response type to determine the structure of the packed object
-    # if response_type == ResponseType.:  # Adjust this based on your actual response types
-    #     # Assuming the response type 1 has a string data following it
-    #     data_length = struct.unpack('!H', response[2:4])[0]
-    #     data = binary_response[4:4 + data_length].decode('utf-8')
-
-    #     # Now 'data' contains the additional data for response type 1
-    #     print(f"Response Type: {response_type}, Data: {data}")
-    # else:
-    #     print(f"Unknown Response Type: {response_type}")
