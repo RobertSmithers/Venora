@@ -13,16 +13,19 @@ logger = logging.getLogger(__name__)
 
 
 class Request:
-    def __init__(self, type: RequestType, data=None) -> None:
-        self.type = type
+    """A client's request object to build and send to server"""
+
+    def __init__(self, req_type: RequestType, data=None) -> None:
+        self.req_type = req_type
         self.data = data
 
     def pack(self) -> Optional[bytes]:
         """
         Packs the Request object into bytes to send to Venora server
         """
-        # Note: packer assumes that data is correctly formatted for the given RequestType
-        return pack_req(self.type, self.data)
+        # Note: packer assumes that data is correctly formatted for the given
+        # RequestType
+        return pack_req(self.req_type, self.data)
 
 
 def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socket]:
@@ -34,17 +37,18 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
         server_port (int): The port number to connect to on the server.
 
     Returns:
-        socket.socket or None: 
+        socket.socket or None:
             - If the connection is successful, returns a connected socket object.
             - If there is an error during connection, returns None.
     """
     try:
         c_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        c_sock.settimeout(5)
         c_sock.connect((server_ip, server_port))
 
         return c_sock
     except (socket.error, TypeError) as e:
-        logger.debug(f"Error connecting to the server: {e}")
+        logger.debug("Error connecting to the server: %s", e)
         return None
 
 
@@ -60,6 +64,7 @@ def recv_from_srv(sock: socket.socket, verbose: bool = False) -> bytes:
     Returns:
         str: The received message as a string.
     """
+    print("verbose is", verbose)
     try:
         data = sock.recv(1024)
 
@@ -70,12 +75,13 @@ def recv_from_srv(sock: socket.socket, verbose: bool = False) -> bytes:
 
         if verbose:
             # Output to logs and console
-            logger.info(f"Received: {message}")
+            print("outputting")
+            logger.info("Received: %s", message)
         return message
 
     except socket.error as e:
         # Handle receiving errors
-        logger.debug(f"Error receiving data from the server: {e}")
+        logger.debug("Error receiving data from the server: %s", e)
         return ""
 
 
@@ -92,12 +98,14 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
     Returns:
         None
     """
+    print("verbose is", verbose)
     try:
         sock.sendall(data)
 
         if verbose:
             # Output to logs and console
-            logger.info(f"Sent: {data}")
+            print("outputting")
+            logger.info("Sent: %s", data)
 
     except socket.error as e:
-        logger.error(f"Error sending data to the server: {e}")
+        logger.error("Error sending data to the server: %s", e)

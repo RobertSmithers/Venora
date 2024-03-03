@@ -49,16 +49,16 @@ def run_client() -> None:
     logger.info(f"Connecting to Venora Server ({ip}:{port})")
     c_sock = connect_to_server(ip, port)
     # If fail to connect, retry one time after a timeout
-    # if not c_sock:
-    #     logger.warn(
-    #         "Failed to connect to server. Retrying in %d seconds.", CONNECTION_RETRY_TIME)
-    #     time.sleep(CONNECTION_RETRY_TIME)
-    #     c_sock = connect_to_server(ip, port)
+    if not c_sock:
+        logger.warn(
+            "Failed to connect to server. Retrying in %d seconds.", CONNECTION_RETRY_TIME)
+        time.sleep(CONNECTION_RETRY_TIME)
+        c_sock = connect_to_server(ip, port)
 
     # If failed a second time, abort
-    # if not c_sock:
-    #     logger.error("Failed to connect to server")
-    #     return
+    if not c_sock:
+        logger.error("Failed to connect to server")
+        return
 
     # Connected to server
     logger.info(f"Connected to Venora Server {ip}:{port}")
