@@ -49,7 +49,6 @@ def load_settings_from_file(filename: str) -> json:
     try:
         with open(filename, 'r', encoding='utf8') as f:
             jf = json.load(f)
-            print(json.dumps(jf, indent=2))
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON in file {filename}: {e}")
         return {}
@@ -74,5 +73,5 @@ def write_settings_to_file(filename: str, settings: dict) -> None:
 
     # pylint: disable=consider-using-with
     f = open(filename, 'w', encoding='utf8')
-    f.write(json.dumps(settings))
+    f.write(json.dumps(settings, indent=2))
     f.close()
