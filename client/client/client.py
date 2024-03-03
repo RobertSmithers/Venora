@@ -64,7 +64,7 @@ def run_client() -> None:
     logger.info(f"Connected to Venora Server {ip}:{port}")
 
     # Here I should have a shell to input commands/talk to program --> talk to server if needed
-    client_cmd = ClientCmd()
+    client_cmd = ClientCmd(c_sock)
     client_cmd.cmdloop()
 
 

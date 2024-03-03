@@ -5,7 +5,7 @@ ADD requirements.txt /tmp/
 RUN pip3 install -U pip
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
-ADD client.py /client/
+ADD . /client/
 
 # Env vars for client dir subfolders
 ENV PROJECT_SRVHOME=/client

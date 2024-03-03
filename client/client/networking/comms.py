@@ -98,7 +98,6 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
     Returns:
         None
     """
-    print("verbose is", verbose)
     try:
         sock.sendall(data)
 

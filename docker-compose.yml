@@ -5,9 +5,11 @@ services:
     build: server/
     env_file: ./server/server.env
     command:
-      - ./build.sh
+      - cat
+      - build.sh
+      # - ./build.sh
     ports:
-      - 1234:9393
+      - 4321:9393
     # depends_on:
     #   - postgres
     # restart: always
@@ -17,7 +19,7 @@ services:
 
   client:
     build: client/
-    command: python3 ./client.py
+    command: ./install_client_pkg.sh && venora-client
     network_mode: host
     depends_on:
       - server
