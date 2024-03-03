@@ -44,7 +44,7 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
 
         return c_sock
     except (socket.error, TypeError) as e:
-        logger.warning(f"Error connecting to the server: {e}")
+        logger.debug(f"Error connecting to the server: {e}")
         return None
 
 
@@ -71,12 +71,11 @@ def recv_from_srv(sock: socket.socket, verbose: bool = False) -> bytes:
         if verbose:
             # Output to logs and console
             logger.info(f"Received: {message}")
-            print(f"Received: {message}")
         return message
 
     except socket.error as e:
         # Handle receiving errors
-        logger.error(f"Error receiving data from the server: {e}")
+        logger.debug(f"Error receiving data from the server: {e}")
         return ""
 
 
@@ -99,7 +98,6 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
         if verbose:
             # Output to logs and console
             logger.info(f"Sent: {data}")
-            print(f"Sent: {data}")
 
     except socket.error as e:
         logger.error(f"Error sending data to the server: {e}")

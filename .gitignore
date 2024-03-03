@@ -57,9 +57,12 @@ dkms.conf
 *.egg-info/
 *.log
 client/__pycache__/
+client/build/
+
 *.pyc
 dist/
 build/
+*settings.json
 
 # Secrets & Non-Public
 db/

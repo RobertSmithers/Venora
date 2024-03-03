@@ -17,12 +17,12 @@ Note:
 """
 
 #!/usr/bin/env python3
-
-import logging
 import time
 
-from client.config import get_settings, save_settings, LOG_FILENAME, CONNECTION_RETRY_TIME
-import client.networking.comms as net
+from client.cmd import ClientCmd
+from client.config.settings import get_settings, save_settings, LOG_FILENAME, CONNECTION_RETRY_TIME
+from client.config.logs import setup_logging
+from client.networking.comms import connect_to_server
 
 
 def run_client() -> None:
@@ -35,38 +35,37 @@ def run_client() -> None:
 
     # Get the settings from 3 sources and save it
     settings = get_settings()
+    logger = setup_logging(settings.get('log_file', LOG_FILENAME))
     save_settings(settings)
-
-    # Setup logging
-    logging.basicConfig(filename=settings.get('log_file', LOG_FILENAME),
-                        level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-    logging.info('Settings: %s', settings)
 
     ip, port = settings.get('server_ip'), settings.get('server_port')
     if not ip or not port:
-        logging.error("Server IP or port is not set")
+        logger.error("Server IP or port is not set")
         return
     if not isinstance(port, int):
-        logging.error("Could not parse server port number")
+        logger.error("Could not parse server port number")
         return
 
-    c_sock = net.connect_to_server(ip, port)
+    logger.info(f"Connecting to Venora Server ({ip}:{port})")
+    c_sock = connect_to_server(ip, port)
     # If fail to connect, retry one time after a timeout
-    if not c_sock:
-        logging.info(
-            "Failed to connect to server. Retrying in %d seconds.", CONNECTION_RETRY_TIME)
-        time.sleep(CONNECTION_RETRY_TIME)
-        c_sock = net.connect_to_server(ip, port)
+    # if not c_sock:
+    #     logger.warn(
+    #         "Failed to connect to server. Retrying in %d seconds.", CONNECTION_RETRY_TIME)
+    #     time.sleep(CONNECTION_RETRY_TIME)
+    #     c_sock = connect_to_server(ip, port)
 
     # If failed a second time, abort
-    if not c_sock:
-        logging.error("Failed to connect to server")
-        return
+    # if not c_sock:
+    #     logger.error("Failed to connect to server")
+    #     return
 
     # Connected to server
-    logging.info(f"Connected to Venora Server {ip}:{port}")
+    logger.info(f"Connected to Venora Server {ip}:{port}")
 
     # Here I should have a shell to input commands/talk to program --> talk to server if needed
+    client_cmd = ClientCmd()
+    client_cmd.cmdloop()
 
 
 def main():

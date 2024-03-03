@@ -5,7 +5,7 @@ import struct
 import logging
 from typing import Any, Dict, Optional
 
-from client.config import USERNAME_MAX_CHARS
+from client.config.settings import USERNAME_MAX_CHARS
 from client.networking.schema import RequestType, ResponseType
 
 # Note: I was really close to calling this packman.py

@@ -1,4 +1,7 @@
-
+pylint
+autopep8
+cmd2
+colorlog
 
 # Testing
 pytest
