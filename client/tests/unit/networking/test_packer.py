@@ -1,7 +1,7 @@
 import pytest
 import struct
 
-from client.config import USERNAME_MAX_CHARS
+from client.config.settings import USERNAME_MAX_CHARS
 from client.networking.schema import RequestType
 from client.networking.packer import (
     ResponseType,
@@ -16,10 +16,10 @@ from client.networking.packer import (
      b'\x00\x01\x00\x05alice'),
     ({"username": "bob", "token": 1234},
      b'\x00\x01\x00\x03bob'),
-    ({"username": "a"*USERNAME_MAX_CHARS},
+    ({"username": "a" * USERNAME_MAX_CHARS},
      b'\x00\x01' + struct.pack(f'!H{USERNAME_MAX_CHARS}s',
                                USERNAME_MAX_CHARS,
-                               ("a"*USERNAME_MAX_CHARS).encode())
+                               ("a" * USERNAME_MAX_CHARS).encode())
      ),
 ])
 def test_pack_type_register(data, expected_result):
@@ -45,8 +45,8 @@ def test_pack_type_register_missing_field(data):
 
 
 @pytest.mark.parametrize("data", [
-    ({"username": "a"*(USERNAME_MAX_CHARS+1)}),
-    ({"username": "abc"*USERNAME_MAX_CHARS}),
+    ({"username": "a" * (USERNAME_MAX_CHARS + 1)}),
+    ({"username": "abc" * USERNAME_MAX_CHARS}),
 ])
 def test_pack_type_register_username_too_large(data):
     """
@@ -69,8 +69,8 @@ def test_pack_type_authenticate(data, expected_result):
 
 
 @pytest.mark.parametrize("data", [
-    ({"username": "a"*(USERNAME_MAX_CHARS+1), "token": "abc123"}),
-    ({"username": "abc"*USERNAME_MAX_CHARS, "token": "abc123"}),
+    ({"username": "a" * (USERNAME_MAX_CHARS + 1), "token": "abc123"}),
+    ({"username": "abc" * USERNAME_MAX_CHARS, "token": "abc123"}),
 ])
 def test_pack_type_authenticate_username_too_large(data):
     """

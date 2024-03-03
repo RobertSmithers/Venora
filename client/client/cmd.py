@@ -1,11 +1,21 @@
-import cmd2
+"""
+cmd module
+
+Runs a fake command prompt for the user to interact with Venora server
+using specified commands/actions
+"""
 import logging
 import socket
+
+import cmd2
 
 logger = logging.getLogger(__name__)
 
 
 class ClientCmd(cmd2.Cmd):
+    """cmd2 instance to handle interfacing with user
+    Will eventually replace this with a web frontend"""
+
     def __init__(self, sock: socket.socket):
         super().__init__()
         self.hidden_commands = {
@@ -28,7 +38,8 @@ class ClientCmd(cmd2.Cmd):
         """Register a user with the provided username."""
         username = arg.strip()
         if username:
-            # TODO: register functionality (temporarily allow all/receive token)
+            # TODO: register functionality (temporarily allow all/receive
+            # token)
             print(f"User '{username}' registered successfully.")
         else:
             print("Please provide a username for registration. (ex: login RJ)")
@@ -49,12 +60,8 @@ class ClientCmd(cmd2.Cmd):
         else:
             print("Invalid command. Use 'list packs' to list packs.")
 
-    def do_quit(self, arg):
+    # pylint: disable=unused-argument
+    def do_quit(self, args):
         """Quit the program."""
         print("Exiting the program.")
         return True
-
-
-if __name__ == '__main__':
-    client_cmd = ClientCmd()
-    client_cmd.cmdloop()

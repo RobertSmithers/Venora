@@ -1,5 +1,5 @@
 """
-Handles packing and unpacking for client requests and server responses 
+Handles packing and unpacking for client requests and server responses
 """
 import struct
 import logging
@@ -81,7 +81,13 @@ def pack_type_authenticate(data: dict) -> Optional[bytes]:
             "Failed to pack an authenticate request - no token provided")
         return None
     token_len = len(token)
-    return struct.pack(f"!HH{user_len}sH{token_len}s", RequestType.AUTHENTICATE.value, user_len, username.encode(), token_len, token.encode())
+    return struct.pack(f"!HH{user_len}sH{token_len}s",
+                       RequestType.AUTHENTICATE.value,
+                       user_len,
+                       username.encode(),
+                       token_len,
+                       token.encode()
+                       )
 
 
 def pack_req(req_type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:

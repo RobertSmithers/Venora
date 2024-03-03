@@ -6,7 +6,7 @@
     {
       "label": "Client Unit Tests",
       "type": "shell",
-      "command": "./run_client_unit_tests.sh",
+      "command": "./client/run_client_unit_tests.sh",
       "options": {
         "cwd": "${workspaceFolder}"
       }
@@ -24,6 +24,13 @@
     {
       "label": "Client Build",
       "command": "pylint $(git ls-files *.py) && pip install .",
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      }
+    },
+    {
+      "label": "Client Lint",
+      "command": "pylint $(git ls-files *.py)",
       "options": {
         "cwd": "${workspaceFolder}/client"
       }

@@ -1,9 +1,12 @@
+"""
+test class for client.networking.comms.py
+"""
 # client/networking/test_client.py
 
-import logging
 import socket
-import pytest
 from unittest.mock import patch, Mock
+import pytest
+import logging
 from client.networking.comms import (
     connect_to_server,
     recv_from_srv,
@@ -29,6 +32,7 @@ def mock_socket():
     ("127.0.0.1", 53),
 ])
 def test_connect_to_server(server_ip, server_port, mock_socket):
+    """tests connect to server returns a single socket with given ip:port"""
     result = connect_to_server(server_ip, server_port)
 
     assert result == mock_socket
@@ -39,9 +43,10 @@ def test_connect_to_server(server_ip, server_port, mock_socket):
 @pytest.mark.parametrize("server_ip, server_port", [
     ("255.255.255.255", 8080),
     ("1.1.1.256", 2345),
-    ("192.168.1", 3456),
+    ("192.16a.1.1", 3456),
 ])
 def test_connect_to_server_invalid_ip(server_ip, server_port):
+    """tests connect to server returns None when given invalid ip"""
     result = connect_to_server(server_ip, server_port)
     assert result is None
 
@@ -52,17 +57,19 @@ def test_connect_to_server_invalid_ip(server_ip, server_port):
     (False, "test_data"),
     (True, "test_data")
 ])
-def test_recv_from_srv_different_verbosity(mock_socket, verbose, expected_result):
-    with patch("builtins.print") as mock_print:
+def test_recv_from_srv_different_verbosity(
+        mock_socket, caplog, verbose, expected_result):
+    """tests connect to server prints the received data when verbose is set"""
+    with caplog.at_level(logging.INFO):
         with patch.object(mock_socket, "recv", return_value=b"test_data") as mock_recv:
             result = recv_from_srv(mock_socket, verbose)
 
     assert result == expected_result
     mock_recv.assert_called_once_with(1024)
     if verbose:
-        mock_print.assert_called_once_with(f"Received: {expected_result}")
+        assert f"Received: {expected_result}" in caplog.text
     else:
-        mock_print.assert_not_called()
+        assert "Received:" not in caplog.text
 
 ## send_to_srv ##
 
@@ -71,13 +78,14 @@ def test_recv_from_srv_different_verbosity(mock_socket, verbose, expected_result
     (b"test_data", False),
     (b"test_data", True),
 ])
-def test_send_to_srv(mock_socket, data, verbose):
-    with patch("builtins.print") as mock_print:
+def test_send_to_srv(mock_socket, caplog, data, verbose):
+    """tests send to srv uses sendall and logs it when verbose"""
+    with caplog.at_level(logging.INFO):
         with patch.object(mock_socket, "sendall") as mock_sendall:
             send_to_srv(mock_socket, data, verbose)
 
     mock_sendall.assert_called_once_with(data)
     if verbose:
-        mock_print.assert_called_once_with(f"Sent: {data}")
+        assert f"Sent: {data}" in caplog.text
     else:
-        mock_print.assert_not_called()
+        assert "Sent:" not in caplog.text

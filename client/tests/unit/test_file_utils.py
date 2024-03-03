@@ -4,16 +4,16 @@ test_file_utils module
 Unit tests for the file_utils module.
 
 Functions:
-- test_load_settings_from_file(file_content, expected_settings): 
+- test_load_settings_from_file(file_content, expected_settings):
   Test loading settings from a JSON file.
 
-- test_load_settings_from_file_not_found_error(): 
+- test_load_settings_from_file_not_found_error():
   Test handling FileNotFoundError when loading settings.
 
-- test_load_settings_from_file_invalid_json(file_content): 
+- test_load_settings_from_file_invalid_json(file_content):
   Test loading settings with invalid JSON content.
 
-- test_write_settings_to_file(settings): 
+- test_write_settings_to_file(settings):
   Test writing settings to a JSON file.
 """
 
@@ -74,7 +74,7 @@ def test_write_settings_to_file(settings):
         write_settings_to_file('test_settings.json', settings)
         mock_file.assert_called_once_with(
             'test_settings.json', 'w', encoding='utf8')
-        mock_file().write.assert_called_once_with(json.dumps(settings))
+        mock_file().write.assert_called_once_with(json.dumps(settings, indent=2))
         mock_file().close.assert_called_once()
 
 
