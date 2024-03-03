@@ -42,16 +42,16 @@ class ClientCmd(cmd2.Cmd):
             # token)
             print(f"User '{username}' registered successfully.")
         else:
-            print("Please provide a username for registration. (ex: login RJ)")
+            print("Please provide a username for registration. (ex: register RJ)")
 
     def do_login(self, arg):
         """Login with the provided username."""
-        username = arg.strip()
-        if username:
+        token = arg.strip()
+        if token:
             # TODO: login functionality (server-side db validation)
-            print(f"User '{username}' logged in successfully.")
+            print("Login successful!")
         else:
-            print("Please provide a username for login.")
+            print("Please provide a token for login. (ex: login longtokenstringgoeshere)")
 
     def do_list(self, arg):
         """List packs."""

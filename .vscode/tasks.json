@@ -6,9 +6,9 @@
     {
       "label": "Client Unit Tests",
       "type": "shell",
-      "command": "./client/run_client_unit_tests.sh",
+      "command": "./run_client_unit_tests.sh",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/client"
       }
     },
     {
