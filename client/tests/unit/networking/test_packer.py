@@ -1,5 +1,5 @@
-import pytest
 import struct
+import pytest
 
 from client.config.settings import USERNAME_MAX_CHARS
 from client.networking.schema import RequestType

@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define MAX_CLIENTS 5
 #define BUFFER_SIZE 1024
@@ -11,22 +12,26 @@
 // TODO: Handle mutex/concurrency
 short client_count = 0;
 
+bool is_socket_closed(int sock) {
+    
+    return true;
+}
+
 void handle_client(int sock) {
-    printf("Deal with talking to the client in this thread");
     char buffer[BUFFER_SIZE];
-        ssize_t bytes_received;
+    int c_sock = sock;
 
-        // Receive data from the client
-        while ((bytes_received = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
-            printf("Received from client: %.*s", (int)bytes_received, buffer);
+    while (!socket_closed(c_sock)) {
+        ssize_t bytes_received = recv(sock, buffer, sizeof(buffer), 0);
+        printf("Received from client: %.*s", (int)bytes_received, buffer);
+        // TODO: Protobuff here for request_type
+        request_type = bytes_received[0];
+    }
 
-            // TODO: Business logic
-        }
+    close(sock);
 
-        close(sock);
-
-        printf("Client disconnected.\n");
-        client_count--;
+    printf("Client disconnected.\n");
+    client_count--;
 }
 
 int main() {

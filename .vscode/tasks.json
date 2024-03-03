@@ -3,41 +3,73 @@
   // for the documentation about the tasks.json format
   "version": "2.0.0",
   "tasks": [
+    // {
+    //   "label": "Client Unit Tests",
+    //   "type": "shell",
+    //   "command": "./run_client_unit_tests.sh",
+    //   "options": {
+    //     "cwd": "${workspaceFolder}/client"
+    //   }
+    // },
     {
       "label": "Client Unit Tests",
       "type": "shell",
-      "command": "./run_client_unit_tests.sh",
+      "command": "wsl.exe",
+      "args": ["./run_client_unit_tests.sh"],
       "options": {
         "cwd": "${workspaceFolder}/client"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
       }
     },
     {
       "label": "Client Functional Tests",
       "type": "shell",
-      "command": "./run_client_functional_tests"
+      "command": "wsl.exe",
+      "args": ["./run_client_functional_tests"],
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "label": "Client Integration Tests",
       "type": "shell",
-      "command": "./run_client_integration_tests"
+      "command": "wsl.exe",
+      "args": ["./run_client_integration_tests"],
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "label": "Client Build",
-      "command": "pylint $(git ls-files *.py) && pip install .",
+      "command": "wsl.exe",
+      "args": ["/bin/bash", "-c", "python3 -m pip install -e ."],
       "options": {
         "cwd": "${workspaceFolder}/client"
       }
     },
     {
       "label": "Client Lint",
-      "command": "pylint $(git ls-files *.py)",
+      "command": "wsl.exe",
+      "args": ["/bin/bash", "-c", "git ls-files '*.py' | xargs pylint"],
       "options": {
         "cwd": "${workspaceFolder}/client"
       }
     },
     {
       "label": "Server Build",
-      "command": "./build.sh",
+      "command": "wsl.exe",
+      "args": ["/bin/bash", "-c", "./build.sh"],
       "options": {
         "cwd": "${workspaceFolder}/server"
       }
