@@ -13,6 +13,7 @@ class RequestType(Enum):
     """
     REGISTER = 1
     AUTHENTICATE = 2
+    GET_STRIKE_PACKS = 3
 
 
 class ResponseType(Enum):

@@ -10,6 +10,8 @@ LOG_FILENAME = "client.log"
 CONNECTION_RETRY_TIME = 10  # in seconds
 USERNAME_MAX_CHARS = 100
 
+CHUNK_SIZE = 1024
+
 default_settings = {
     'log_file': LOG_FILENAME,
     'verbose': False,

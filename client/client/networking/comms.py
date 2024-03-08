@@ -6,6 +6,7 @@ import socket
 import logging
 from typing import Optional
 
+from client.config.settings import CHUNK_SIZE
 from client.networking.schema import RequestType
 from client.networking.packer import pack_req
 
@@ -98,13 +99,22 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
     Returns:
         None
     """
+    total_sent = 0
+    n = len(data)
+
     try:
-        sock.sendall(data)
+        while total_sent < n:
+            bytes_sent = sock.send(data[total_sent:total_sent+CHUNK_SIZE])
+
+            if bytes_sent == 0:
+                raise ConnectionError("Connection closed during send")
+
+            total_sent += bytes_sent
 
         if verbose:
             # Output to logs and console
             print("outputting")
-            logger.info("Sent: %s", data)
+            logger.info("Sent: %d bytes of data\n%s", n, data)
 
     except socket.error as e:
         logger.error("Error sending data to the server: %s", e)

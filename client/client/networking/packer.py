@@ -90,6 +90,21 @@ def pack_type_authenticate(data: dict) -> Optional[bytes]:
                        )
 
 
+def pack_type_get_strike_packs(data: dict) -> Optional[bytes]:
+    """
+    packs data for the get strike packs request
+
+    Args:
+        data (dict): Empty dictionary
+
+    Returns:
+        None if error, otherwise
+        bytes of packed object in the form:
+            unsigned short  - RequestType
+    """
+    return struct.pack(f"!H", RequestType.GET_STRIKE_PACKS.value)
+
+
 def pack_req(req_type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
     """
     Packs a request message based on the specified request type and data.
@@ -110,7 +125,8 @@ def pack_req(req_type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
     """
     pack_handlers = {
         RequestType.REGISTER: pack_type_register,
-        RequestType.AUTHENTICATE: pack_type_authenticate
+        RequestType.AUTHENTICATE: pack_type_authenticate,
+        RequestType.GET_STRIKE_PACKS: pack_type_get_strike_packs,
     }
 
     handler = pack_handlers.get(type)

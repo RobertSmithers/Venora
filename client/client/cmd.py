@@ -8,6 +8,11 @@ import logging
 import socket
 
 import cmd2
+from client.networking.actions import (
+    register,
+    login,
+    get_strike_packs
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,16 +45,24 @@ class ClientCmd(cmd2.Cmd):
         if username:
             # TODO: register functionality (temporarily allow all/receive
             # token)
-            print(f"User '{username}' registered successfully.")
+            register(self.sock, username, True)
+            # print(f"User '{username}' registered successfully.")
         else:
             print("Please provide a username for registration. (ex: register RJ)")
 
-    def do_login(self, arg):
+    def do_login(self, args):
         """Login with the provided username."""
-        token = arg.strip()
-        if token:
+        self.parsed_args = self.parser.parse_args(args)
+        username = self.parsed_args[0]
+        token = None
+        if len(self.parsed_args > 1):
+            token = self.parsed_args[1]
+        else:
+            token = input("Please enter your token:")
+        if username and token:
             # TODO: login functionality (server-side db validation)
             print("Login successful!")
+            login(self.sock, username, token, True)
         else:
             print("Please provide a token for login. (ex: login longtokenstringgoeshere)")
 
