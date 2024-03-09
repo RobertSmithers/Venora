@@ -7,26 +7,8 @@ import logging
 from typing import Optional
 
 from client.config.settings import CHUNK_SIZE
-from client.networking.schema import RequestType
-from client.networking.packer import pack_req
 
 logger = logging.getLogger(__name__)
-
-
-class Request:
-    """A client's request object to build and send to server"""
-
-    def __init__(self, req_type: RequestType, data=None) -> None:
-        self.req_type = req_type
-        self.data = data
-
-    def pack(self) -> Optional[bytes]:
-        """
-        Packs the Request object into bytes to send to Venora server
-        """
-        # Note: packer assumes that data is correctly formatted for the given
-        # RequestType
-        return pack_req(self.req_type, self.data)
 
 
 def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socket]:
@@ -44,7 +26,7 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
     """
     try:
         c_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        c_sock.settimeout(5)
+        # c_sock.settimeout(5)
         c_sock.connect((server_ip, server_port))
 
         return c_sock
@@ -53,8 +35,7 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
         return None
 
 
-# I think I want to specify type enumerations here for responses
-def recv_from_srv(sock: socket.socket, verbose: bool = False) -> bytes:
+def recv_from_srv(sock: socket.socket, num_bytes: int = CHUNK_SIZE, verbose: bool = False) -> bytes:
     """
     Receive a message from Venora server.
 
@@ -63,30 +44,25 @@ def recv_from_srv(sock: socket.socket, verbose: bool = False) -> bytes:
         verbose (bool, optional): If True, print verbose information. Default is False.
 
     Returns:
-        str: The received message as a string.
+        bytes: The raw response received in bytes.
     """
-    print("verbose is", verbose)
     try:
-        data = sock.recv(1024)
+        data = sock.recv(num_bytes)
 
         if not data:
             raise socket.error("Connection closed by the server.")
 
-        message = data.decode('utf-8')
-
         if verbose:
             # Output to logs and console
-            print("outputting")
-            logger.info("Received: %s", message)
-        return message
+            logger.info("Received: %s", data)
+        return data
 
     except socket.error as e:
         # Handle receiving errors
         logger.debug("Error receiving data from the server: %s", e)
-        return ""
+        return b''
 
 
-# See above comment (enumerations for requests as well)
 def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None:
     """
     Send a message to the server.
@@ -113,7 +89,6 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
 
         if verbose:
             # Output to logs and console
-            print("outputting")
             logger.info("Sent: %d bytes of data\n%s", n, data)
 
     except socket.error as e:

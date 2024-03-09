@@ -6,6 +6,7 @@
 
 #include <actions.h>
 #include <account.h>
+#include "../database/token.h"
 
 bool register_user(char *username, uint16_t username_len, char *token)
 {
@@ -13,15 +14,17 @@ bool register_user(char *username, uint16_t username_len, char *token)
     registers the user with username and returns an access token.
     Returns true on success, false if user exists or failure
     */
-    printf("Registering %s with size %d\n", username, username_len);
-    printf("TODO: Setup db and authenticate the username");
+
+    // TODO: Setup db and authenticate the username
     // TODO: If username taken, return false
 
     // TODO: Generate random token
-    char *gend_token = "abcdefghijklmnopqrstuvwxyz12345";
+    // char *gend_token = "abcdefghijklmnopqrstuvwxyz123456";
 
     // Copy token into struct
-    memcpy(token, gend_token, TOKEN_SIZE);
+    // memcpy(token, gend_token, TOKEN_SIZE);
+    generate_token(token, TOKEN_SIZE);
+
     return true;
 }
 

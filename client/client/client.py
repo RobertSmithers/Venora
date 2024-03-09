@@ -57,14 +57,14 @@ def run_client() -> None:
 
     # If failed a second time, abort
     if not c_sock:
-        logger.error("Failed to connect to server")
-        return
-
-    # Connected to server
-    logger.info(f"Connected to Venora Server {ip}:{port}")
+        logger.warn(
+            "Failed to connect to server. Commands will not work until you issue `connect`")
+    else:
+        # Connected to server
+        logger.info(f"Connected!")
 
     # Here I should have a shell to input commands/talk to program --> talk to server if needed
-    client_cmd = ClientCmd(c_sock)
+    client_cmd = ClientCmd(c_sock, settings)
     client_cmd.cmdloop()
 
 

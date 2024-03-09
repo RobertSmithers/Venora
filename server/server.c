@@ -22,7 +22,17 @@ short client_count = 0;
 
 bool socket_closed(int sock)
 {
+    char buffer[1];
+    ssize_t bytesReceived = recv(sock, buffer, sizeof(buffer), MSG_PEEK);
 
+    if (bytesReceived <= 0)
+    {
+        // Graceful close == 0
+        // Error or other close < 0
+        return true;
+    }
+
+    // Connection is still open
     return false;
 }
 
@@ -35,21 +45,15 @@ void handle_client(int sock)
 
     while (!socket_closed(c_sock))
     {
-        // First two bytes should be the req type
-        recv(sock, buffer, REQ_RESP_TYPE_SIZE, 0);
-        uint16_t offset = REQ_RESP_TYPE_SIZE;
-
-        // ssize_t bytes_received = recv(sock, buffer, sizeof(buffer), 0);
-        // printf("Received from client: %.*s", (int)bytes_received, buffer);
         // TODO: Protobuff here for request_type
+        // First two bytes should be the req type
         uint16_t request_type;
-        memcpy(&request_type, buffer, 2);
+        recv(sock, &request_type, REQ_RESP_TYPE_SIZE, 0);
         request_type = ntohs(request_type);
 
         switch (request_type)
         {
         case REQUEST_REGISTER:
-            printf("Register here\n");
 
             if (curr_state != NEW)
             {
@@ -59,17 +63,13 @@ void handle_client(int sock)
                 //      after some threshold timeout period
                 char *msg = "You have already registered. Please login.";
                 send_response_failure(c_sock, msg);
+                continue;
             }
 
             // Extract username size and username string
-            recv(sock, buffer + offset, REQ_DATA_VARLEN_SIZE, 0);
             uint16_t username_len;
-            memcpy(&username_len, buffer + offset, 2);
+            recv(sock, &username_len, REQ_DATA_VARLEN_SIZE, 0);
             username_len = ntohs(username_len);
-            offset += REQ_DATA_VARLEN_SIZE;
-
-            recv(sock, buffer + offset, username_len, 0);
-
 
             // Prevent buffer overflow or other memcpy error
             if (username_len > MAX_USERNAME_LEN)
@@ -82,15 +82,16 @@ void handle_client(int sock)
             }
 
             user->username = (char *)malloc(username_len * sizeof(char));
-            memcpy(user->username, &buffer[offset], username_len);
-            printf("Username is %s\n", user->username);
+            recv(sock, user->username, username_len, 0);
+
             user->token = (char *)malloc(TOKEN_SIZE * sizeof(char));
 
             // Do user registration
             if (register_user(user->username, username_len, user->token))
             {
                 printf("User %s registered successfully\n", user->username);
-                send_response_success(c_sock, user->token, TOKEN_SIZE);
+                printf("Sending token %s\n", user->token);
+                send_response_success_data(c_sock, user->token, TOKEN_SIZE);
                 curr_state = REGISTERED;
             }
             else
@@ -115,7 +116,7 @@ void handle_client(int sock)
         }
     }
 
-    // As long as it's past the new state, user account will be populated
+    // As long as it's past the 'NEW' state, user account will be populated
     if (curr_state != NEW)
     {
         free(user->username);
@@ -125,7 +126,7 @@ void handle_client(int sock)
 
     close(sock);
 
-    printf("Client disconnected.\n");
+    printf("Client disconnected.\n\n");
     client_count--;
 }
 
@@ -134,6 +135,7 @@ int main()
     printf("I am a server. I am A SERVER. I am A SERVER. I AM A SERVER!\n");
 
     int server_socket, client_socket;
+    srand((unsigned int)time(NULL)); // Used for token generation
 
     struct sockaddr_in server_address, client_address;
     socklen_t client_address_len = sizeof(client_address);
@@ -176,7 +178,7 @@ int main()
     // Listen for clients
     while (1)
     {
-
+        // TODO: Store socket: ip map in shared memory to prevent multiple connections from same IP
         if ((client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len)) == -1)
         {
             perror("Socket accept failed");
@@ -185,7 +187,7 @@ int main()
 
         printf("Client connected: %s\n", inet_ntoa(client_address.sin_addr));
         client_count++;
-        printf("Thread out to handle_client\n");
+        printf("Thread out to handle_client\n\n");
         handle_client(client_socket);
     }
 
