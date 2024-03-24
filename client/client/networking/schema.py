@@ -13,6 +13,7 @@ class RequestType(Enum):
     """
     REGISTER = 1
     AUTHENTICATE = 2
+    GET_STRIKE_PACKS = 3
 
 
 class ResponseType(Enum):
@@ -20,6 +21,7 @@ class ResponseType(Enum):
     Enumeration class for requests from server to client.
     """
     SUCCESS = 1
-    FAILURE = 2
-    INVALID_REQUEST = 3
-    SERVER_ERROR = 4
+    SUCCESS_DATA = 2
+    FAILURE = 3
+    INVALID_REQUEST = 4
+    SERVER_ERROR = 5

@@ -2,6 +2,9 @@
 import logging
 import colorlog
 
+GREEN_COLOR_START = '\x1b[1;32m'
+GREEN_COLOR_END = '\x1b[0m'
+
 
 def setup_logging(log_fname: str) -> None:  # logging.Logger:
     """creates and returns a logger instance with a file handler and stdout handler"""
@@ -22,7 +25,7 @@ def setup_logging(log_fname: str) -> None:  # logging.Logger:
                 'ERROR': 'red',
                 'CRITICAL': 'bold_red',
             })
-        file_formatter = logging.Formatter(fmt_str)
+        file_formatter = logging.Formatter('%(asctime)s ' + fmt_str)
 
         # Stdout/cmd handler
         stdout_handler = logging.StreamHandler()

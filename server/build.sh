@@ -10,8 +10,7 @@ make
 
 if [ $? -eq 0 ]
 then
-    echo "Success! Running server"
-    ./VenoraServer
+    echo "Success!"
 else
     echo "Build failed. Aborting"
 fi;
