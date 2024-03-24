@@ -123,8 +123,8 @@ def pack_req(req_type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
 
     Note:
     - This function delegates the packing process to corresponding 'pack_type'
-      functions based on the request type. Ensure that the 'pack_type' functions
-      are implemented for each supported request type.
+      functions based on the request type. 'pack_type' functions
+      must be implemented for each supported request type.
     """
     pack_handlers = {
         RequestType.REGISTER: pack_type_register,
@@ -146,7 +146,9 @@ def pack_req(req_type: RequestType, data: Dict[str, Any]) -> Optional[bytes]:
 
 
 def unpack_response_type(response: bytes) -> ResponseType:
-    """retrieves the ResponseType from the response packet"""
+    """retrieves the ResponseType from the response packet
+    unpack_type functions must be implemented for each supported response type
+    """
     print("Response =", repr(response))
     if not response:
         print("Error: response is ", repr(response))

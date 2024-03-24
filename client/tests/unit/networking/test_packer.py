@@ -96,9 +96,10 @@ def test_pack_type_authenticate_missing_field(data):
 
 @pytest.mark.parametrize("response, expected_result", [
     (b'\x00\x01', ResponseType.SUCCESS),
-    (b'\x00\x02', ResponseType.FAILURE),
-    (b'\x00\x03', ResponseType.INVALID_REQUEST),
-    (b'\x00\x04\x00\x05ohno!', ResponseType.SERVER_ERROR),
+    (b'\x00\x02', ResponseType.SUCCESS_DATA),
+    (b'\x00\x03', ResponseType.FAILURE),
+    (b'\x00\x04', ResponseType.INVALID_REQUEST),
+    (b'\x00\x05\x00\x05ohno!', ResponseType.SERVER_ERROR),
 ])
 def test_unpack_response_type(response, expected_result):
     result = unpack_response_type(response)

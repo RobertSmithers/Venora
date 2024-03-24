@@ -1,21 +1,36 @@
 version: "3"
 
 services:
+  db:
+    image: postgres
+    container_name: server_db
+    env_file: ./db/db.env
+    restart: always
+    ports:
+      - "5432:5432"
+    secrets:
+      - db-password
+    volumes:
+      - ./db/ddl:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data
+    user: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
   server: &server
     build: server/
     env_file: ./server/server.env
     command:
       - cat
       - build.sh
-      # - ./build.sh
     ports:
       - 4321:9393
     # depends_on:
     #   - postgres
     # restart: always
-
-  # postgres:
-  #   build: db
 
   client:
     build: client/
@@ -23,3 +38,9 @@ services:
     network_mode: host
     depends_on:
       - server
+
+volumes:
+  pgdata:
+secrets:
+  db-password:
+    file: db/secrets/password.txt

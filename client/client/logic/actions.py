@@ -65,9 +65,20 @@ def send_get_strike_packs_request(sock: socket.socket, verbose: bool = False) ->
     Expects to receive a listing of capabilities based on permissions of account
     """
     data = {}
-    req = Request(RequestType.GET_STRIKE_PACKS, data)
-    req = req.pack()
+    req = pack_req(RequestType.GET_STRIKE_PACKS, data)
     if req:
         send_to_srv(sock, req, verbose=verbose)
     else:
         logging.error("Failed to send get strike packs request")
+
+
+def receive_get_strike_packs_response(sock: socket.socket, verbose: bool = False) -> List[str]:
+    """
+    Receives a strike packs response and parses data into a list
+    """
+    response = recv_from_srv(sock, 2, verbose=verbose)
+    if not response:
+        logger.warn("Received empty response from server")
+        return []
+    resp_type = unpack_response_type(response)
+    return unpack_type(sock, resp_type, RequestType.GET_STRIKE_PACKS)

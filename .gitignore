@@ -65,6 +65,7 @@ build/
 *settings.json
 
 # Secrets & Non-Public
-db/
 *.env
 hidden/
+db/secrets/
+*.BAK

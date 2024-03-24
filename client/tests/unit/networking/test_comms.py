@@ -54,15 +54,15 @@ def test_connect_to_server_invalid_ip(server_ip, server_port):
 
 
 @pytest.mark.parametrize("verbose, expected_result", [
-    (False, "test_data"),
-    (True, "test_data")
+    (False, b"test_data"),
+    (True, b"test_data")
 ])
 def test_recv_from_srv_different_verbosity(
         mock_socket, caplog, verbose, expected_result):
     """tests connect to server prints the received data when verbose is set"""
     with caplog.at_level(logging.INFO):
         with patch.object(mock_socket, "recv", return_value=b"test_data") as mock_recv:
-            result = recv_from_srv(mock_socket, verbose)
+            result = recv_from_srv(mock_socket, 1024, verbose)
 
     assert result == expected_result
     mock_recv.assert_called_once_with(1024)
@@ -81,11 +81,13 @@ def test_recv_from_srv_different_verbosity(
 def test_send_to_srv(mock_socket, caplog, data, verbose):
     """tests send to srv uses sendall and logs it when verbose"""
     with caplog.at_level(logging.INFO):
-        with patch.object(mock_socket, "sendall") as mock_sendall:
+        with patch.object(mock_socket, "send", return_value=len("test_data")) as mock_send:
             send_to_srv(mock_socket, data, verbose)
 
-    mock_sendall.assert_called_once_with(data)
+    mock_send.assert_called_once_with(data)
     if verbose:
-        assert f"Sent: {data}" in caplog.text
+        assert "Sent: " in caplog.text
+        assert str(data) in caplog.text
     else:
         assert "Sent:" not in caplog.text
+        assert str(data) not in caplog.text
