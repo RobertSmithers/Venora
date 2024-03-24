@@ -1,7 +1,6 @@
 # Create a library for the folder
 add_library(database
     accessor.h
-    accessor.c
     token.h
     token.c
 )
