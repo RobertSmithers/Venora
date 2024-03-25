@@ -3,6 +3,7 @@
 /bin/echo "Building server"
 
 # gcc server.c -o server
+rm -r build/
 mkdir build
 cd build
 cmake ..
