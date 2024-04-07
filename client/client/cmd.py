@@ -10,9 +10,10 @@ import socket
 from typing import Dict
 
 import cmd2
-from client.config.logs import GREEN_COLOR_START, GREEN_COLOR_END
+from client.config.logs import GREEN_COLOR_START, RED_COLOR_START, COLOR_END
 from client.networking.comms import connect_to_server
 from client.networking.schema import ResponseType
+from client.logic.netparse import base_response_handler
 from client.logic.actions import (
     send_register_request, receive_register_response,
     send_login_request,
@@ -80,10 +81,14 @@ class ClientCmd(cmd2.Cmd):
         if not self.sock:
             logger.warn("Failed to connect to server.")
         else:
-            logger.info(GREEN_COLOR_START + "Connected!" + GREEN_COLOR_END)
+            logger.info(GREEN_COLOR_START + "Connected!" + COLOR_END)
 
     def do_register(self, arg):
         """Register a user with the provided username."""
+        if not self.sock:
+            logger.warn("You must connect to a server before registering.")
+            return
+
         username = arg.strip()
         if username:
             # TODO: register functionality (temporarily allow all/receive
@@ -95,21 +100,21 @@ class ClientCmd(cmd2.Cmd):
             #     logger.error(
             #         "Server pipe problem during communication. Cancelling operation")
             #     return
-            print(response)
+            base_response_handler(response)
             status = response[0]
             if status == ResponseType.SUCCESS_DATA:
                 [_, token] = response
-                resp_text_prompt = f"User '{username}' registered successfully. Please save your account's private token, it is only sent once!"
+                resp_text_prompt = f"User '{username}' registered successfully. Please save your account's private token, it is only sent once!\nYou may now login"
                 logger.info(resp_text_prompt)
                 # Using stdout to prevent token artifact in logs
-                print(GREEN_COLOR_START + "Token: " + token + GREEN_COLOR_END)
+                print(GREEN_COLOR_START + "Token: " + token + COLOR_END)
             elif status == ResponseType.FAILURE:
                 [_, msg] = response
                 logger.error("SERVER - %s", msg)
-            elif status == ResponseType.INVALID_REQUEST:
-                logger.error("SERVER - Invalid request")
-            elif status == ResponseType.SERVER_ERROR:
-                logger.error("Server Error")
+            # elif status == ResponseType.INVALID_REQUEST:
+            #     logger.error("SERVER - Invalid request")
+            # elif status == ResponseType.SERVER_ERROR:
+            #     logger.error("Server Error")
             else:
                 logger.error("Unexpected response of type %s",
                              ResponseType(status).name)
@@ -118,23 +123,40 @@ class ClientCmd(cmd2.Cmd):
 
     def do_login(self, args):
         """Login with the provided username."""
+        if not self.sock:
+            logger.warn("You must connect to a server before logging in.")
+            return
+
         if not args.arg_list or len(args.arg_list) != 2:
             logging.error("Usage: login [username] [token]")
             return
 
         username, token = args.arg_list
         if username and token:
-            # try:
-            send_login_request(self.sock, username, token, True)
-            [token] = receive_login_response(self.sock, True)
-            print("Login successful!")
-            # except:
-            #     logger.error(
-            #         "Server pipe problem during communication. Cancelling operation")
-            #     return
+            try:
+                send_login_request(self.sock, username, token, True)
+                resp = receive_login_response(self.sock, True)
+                base_response_handler(
+                    resp, [ResponseType.FAILURE, ResponseType.SUCCESS])
+                if (resp[0] == ResponseType.FAILURE):
+                    if (len(resp) > 1):
+                        print(RED_COLOR_START + "Login failed: " +
+                              str(resp[1]) + COLOR_END)
+                    else:
+                        print(RED_COLOR_START + "Login failed" + COLOR_END)
+                elif (resp[0] == ResponseType.SUCCESS):
+                    print(GREEN_COLOR_START + "Login successful!" + COLOR_END)
+            except:
+                logger.error(
+                    "Server pipe problem during communication. Cancelling operation")
+                return
 
     def do_list(self, arg):
         """List packs."""
+        if not self.sock:
+            logger.warn("You must connect to a server before listing packs.")
+            return
+
         if arg.strip().lower() == 'packs':
             print("Listing packs...")
             send_get_strike_packs_request(self.sock)

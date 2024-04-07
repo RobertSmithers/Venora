@@ -3,7 +3,8 @@ import logging
 import colorlog
 
 GREEN_COLOR_START = '\x1b[1;32m'
-GREEN_COLOR_END = '\x1b[0m'
+RED_COLOR_START = '\033[91m'
+COLOR_END = '\x1b[0m'
 
 
 def setup_logging(log_fname: str) -> None:  # logging.Logger:

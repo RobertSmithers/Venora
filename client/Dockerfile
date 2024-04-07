@@ -13,4 +13,4 @@ ENV PROJECT_SRVHOME=/client
 WORKDIR $PROJECT_SRVHOME
 RUN mkdir logs
 
-WORKDIR $PROJECT_SRVHOME
+CMD ["/bin/bash", "-c", "./install_client_pkg.sh && venora-client"]

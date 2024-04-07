@@ -149,7 +149,6 @@ def unpack_response_type(response: bytes) -> ResponseType:
     """retrieves the ResponseType from the response packet
     unpack_type functions must be implemented for each supported response type
     """
-    print("Response =", repr(response))
     if not response:
         print("Error: response is ", repr(response))
         return None
@@ -175,8 +174,12 @@ def _get_data_blocks(sock: socket.socket, num_blocks: int) -> List[str]:
         response = recv_from_srv(sock, 2)
         data_len = int(struct.unpack('!H', response)[0])
 
+        # If data_len is 0, then there is no more data... end here
+        if not data_len:
+            return ret
+
         # Read data_len bytes of data
-        response = recv_from_srv(sock, int(data_len))
+        response = recv_from_srv(sock, int(data_len), verbose=True)
         data = struct.unpack(f'!{data_len}s', response)[0]
 
         # TODO: Custom class to represent strike pack/other data
@@ -206,12 +209,11 @@ def unpack_type_success_data(sock: socket.socket, req_type: RequestType) -> List
     else:
         logger.warning(
             "Unexpected success_data response for Request Type of %s", req_type.name)
-    print("Unpack success data:", out_data)
     return out_data
 
 
 def unpack_type_failure(sock: socket.socket, req_type: RequestType) -> List[str]:
-    """unpack a failure response and return a singleton of the failure message"""
+    """unpack a failure response and return a list of size 1 of the failure message"""
     return _get_data_blocks(sock, 1)
 
 
@@ -221,5 +223,7 @@ def unpack_type_invalid_request(sock: socket.socket, req_type: RequestType) -> L
 
 
 def unpack_type_server_error(sock: socket.socket, req_type: RequestType) -> List[str]:
-    """unpack a server error response (By default there should be no data)"""
-    return []
+    """unpack a server error response (By default there should only be an error code short)"""
+    response = recv_from_srv(sock, 2)
+    err_code = int(struct.unpack('!H', response)[0])
+    return [err_code]

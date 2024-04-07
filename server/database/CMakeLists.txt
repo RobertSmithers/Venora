@@ -7,4 +7,4 @@ add_library(database
 )
 
 # Include it
-target_include_directories(database PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(database PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PostgreSQL_INCLUDE_DIRS})

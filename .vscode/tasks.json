@@ -72,6 +72,10 @@
       "args": ["/bin/bash", "-c", "./build.sh"],
       "options": {
         "cwd": "${workspaceFolder}/server"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
       }
     },
     {
