@@ -40,17 +40,14 @@ bool socket_closed(int sock)
 void handle_client(int sock, PGconn *db_conn)
 {
     // char buffer[BUFFER_SIZE];
-    // int c_sock = sock;
+    int c_sock = sock;
 
     // Create session data
     SessionData *session = (SessionData *)malloc(sizeof(SessionData));
 
-    // enum SessionState curr_state = NEW;
-    // account *user = (account *)malloc(sizeof(user));
-
-    session->socket = sock;                             // c_sock;
+    session->socket = c_sock;                           // c_sock;
     session->user = (account *)malloc(sizeof(account)); // user;
-    session->state = NEW;                               // curr_state;
+    session->state = UNAUTHENTICATED;                   // curr_state;
     session->db_conn = db_conn;
 
     while (!socket_closed(session->socket))
@@ -70,7 +67,7 @@ void handle_client(int sock, PGconn *db_conn)
             handle_login(session);
             break;
         case REQUEST_GET_STRIKE_PACKS:
-            printf("TODO: Get strike packs here\n");
+            handle_list_strike_packs(session);
             break;
         default:
             printf("Unrecognized request type: %d\n", request_type);
@@ -80,8 +77,8 @@ void handle_client(int sock, PGconn *db_conn)
         // Any code run here will run even in events of error responses
     }
 
-    // As long as it's past the 'NEW' state, user account will be populated
-    if (session->state != NEW)
+    // As long as it's past the 'UNAUTHENTICATED' state, user account will be populated
+    if (session->state != UNAUTHENTICATED)
     {
         printf("Free username\n");
         free(session->user->username);

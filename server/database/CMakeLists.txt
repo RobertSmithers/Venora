@@ -4,6 +4,7 @@ add_library(database
     accessor.c
     token.h
     token.c
+    db_structs.h
 )
 
 # Include it

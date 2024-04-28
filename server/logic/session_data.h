@@ -4,8 +4,7 @@
 
 enum SessionState
 {
-    NEW,
-    REGISTERED,
+    UNAUTHENTICATED,
     AUTHENTICATED,
 };
 

@@ -4,6 +4,8 @@ add_library(networking
     networking.h
     schema.h
     comms.h
+    utils.h
+    utils.c
 )
 
 # Include it

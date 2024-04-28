@@ -1,8 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
+#include <stdint.h>
 
 #include "schema.h"
+
+#pragma once
+typedef struct DataBlock_t
+{
+    void *data;
+    size_t size;
+} DataBlock;
 
 /*
 Clear a socket buffer from any remaining data (and reset back to blocking mode aftewards)
@@ -18,7 +27,8 @@ bool send_response_success(int sock);
 Send a response to the client with the Response Type of Success Data
 Data field follows with the pattern of data size | data ...
 */
-bool send_response_success_data(int sock, void *data, uint16_t data_len);
+bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock **blocks);
+// bool send_response_success_data(int sock, void **data, uint16_t num_data_blocks, uint16_t data_block_size);
 
 /*
 Send a response to the client with the Response Type of Failure

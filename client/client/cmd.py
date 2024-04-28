@@ -91,16 +91,11 @@ class ClientCmd(cmd2.Cmd):
 
         username = arg.strip()
         if username:
-            # TODO: register functionality (temporarily allow all/receive
-            # token)
             # try:
             send_register_request(self.sock, username, True)
             response = receive_register_response(self.sock, True)
-            # except:
-            #     logger.error(
-            #         "Server pipe problem during communication. Cancelling operation")
-            #     return
-            base_response_handler(response)
+            base_response_handler(
+                response, [ResponseType.SUCCESS_DATA, ResponseType.FAILURE])
             status = response[0]
             if status == ResponseType.SUCCESS_DATA:
                 [_, token] = response
@@ -111,13 +106,13 @@ class ClientCmd(cmd2.Cmd):
             elif status == ResponseType.FAILURE:
                 [_, msg] = response
                 logger.error("SERVER - %s", msg)
-            # elif status == ResponseType.INVALID_REQUEST:
-            #     logger.error("SERVER - Invalid request")
-            # elif status == ResponseType.SERVER_ERROR:
-            #     logger.error("Server Error")
             else:
                 logger.error("Unexpected response of type %s",
                              ResponseType(status).name)
+            # except:
+            #     logger.error(
+            #         "Server pipe problem during communication. Cancelling operation")
+            #     return
         else:
             print("Please provide a username for registration. (ex: register RJ)")
 

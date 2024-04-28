@@ -72,7 +72,6 @@ PGresult *get_categories(PGconn *conn)
  */
 PGresult *get_user(PGconn *conn, char *username)
 {
-    // const char *query_template = "SELECT username, token FROM account where username=$1";
     const char *param_values[1] = {username};
     // int param_lengths[1] = {strlen(username)};
     // int param_formats[1] = {0};
@@ -132,4 +131,40 @@ int insert_user(PGconn *conn, char *username, char *token)
     PQclear(res);
 
     return row_ct;
+}
+
+/*
+ * Retrieves all strike packs this user can view
+ *
+ * Returns:
+ *   A PGresult pointer containing 0 or more rows with the fields [strike_name, description, category_id]
+ *   It is the responsibility of the caller to free the result using PQclear().
+ */
+PGresult *get_strike_packs(PGconn *conn, char *username)
+{
+    const char *param_values[1] = {username};
+
+    // Execute query and store result
+    PGresult *res = PQexecParams(conn,
+                                 "SELECT sp.strike_name, sp.description, sp.category_id FROM strike_packs as sp \
+                                 INNER JOIN account_strike_auth as auth on auth.strike_permissions_id=sp.permissions_group_id \
+                                 INNER JOIN account as acc on acc.account_id=auth.account_id \
+                                 WHERE acc.username=$1",
+                                 1,            /* Number of params */
+                                 NULL,         /* Param types */
+                                 param_values, /* Param values */
+                                 NULL,
+                                 NULL,
+                                 0 /* Result format 0-text, 1-binary */
+    );
+
+    if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+        fprintf(stderr, "Query execution failed: %s\n", PQerrorMessage(conn));
+        PQclear(res);
+        PQfinish(conn);
+        exit(EXIT_FAILURE);
+    }
+
+    return res;
 }

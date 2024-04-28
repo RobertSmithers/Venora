@@ -7,6 +7,7 @@ Contains the main logic that the application uses. Calls the appropriate actions
 #include <arpa/inet.h>
 
 #include "networking/networking.h"
+#include "networking/utils.h"
 #include "networking/schema.h"
 #include "logic/actions.h"
 
@@ -19,21 +20,17 @@ uint16_t get_req_varlen_value(int socket)
 
 void handle_registration(SessionData *session)
 {
-    if (session->state != NEW)
+    if (session->state != UNAUTHENTICATED)
     {
-        // TODO: Flush buffer here
-        // Currently only supporting single registration per session
-        // TODO: Allow registration anytime, but delete accounts not logged into
+        // TODO: Delete accounts not logged into
         //      after some threshold timeout period
-        char *msg = "You have already registered. Please login.";
+        char *msg = "Please log out of your current account before registering";
         send_response_failure(session->socket, msg);
         return;
     }
 
     // Extract username size and username string
     uint16_t username_len = get_req_varlen_value(session->socket);
-    // recv(session->socket, &username_len, REQ_DATA_VARLEN_SIZE, 0);
-    // username_len = ntohs(username_len);
 
     // Prevent buffer overflow or other memcpy error
     if (username_len > MAX_USERNAME_LEN)
@@ -45,40 +42,39 @@ void handle_registration(SessionData *session)
         return;
     }
 
-    // TODO: If allowing multiple registrations per session, need to check & free user each time
-    // TODO: Actually don't add this to the session until login
-    account *user = session->user;
-    user->username = (char *)malloc((username_len + 1) * sizeof(char)); // Add space for null terminator char
-    recv(session->socket, session->user->username, username_len, 0);
+    // account *user = session->user;
+    char *req_username = (char *)malloc((username_len + 1) * sizeof(char)); // Add space for null terminator char
+    recv(session->socket, req_username, username_len, 0);
 
-    user->username[username_len] = '\0';
+    req_username[username_len] = '\0';
 
-    printf("user->username is %s (size %d)\n", user->username, username_len);
+    printf("req_username is %s (size %d)\n", req_username, username_len);
 
-    user->token = (char *)malloc(TOKEN_SIZE * sizeof(char));
+    char *token = (char *)malloc(TOKEN_SIZE * sizeof(char));
 
     // Do user registration
-    if (register_user(session->db_conn, user->username, username_len, user->token))
+    if (register_user(session->db_conn, req_username, username_len, token))
     {
-        printf("User %s registered successfully\n", user->username);
-        printf("Sending token %s\n", user->token);
-        send_response_success_data(session->socket, user->token, TOKEN_SIZE);
-        session->state = REGISTERED;
+        printf("User %s registered successfully\n", req_username);
+        printf("Sending token %s\n", token);
+        DataBlock block[1][1] = {{&token, sizeof(token)}};
+        send_response_success_data(session->socket, 1, (DataBlock **)block);
     }
     else
     {
         char msg[40 + username_len];
-        sprintf(msg, "Failed to register. Username %s is taken.", user->username);
+        sprintf(msg, "Failed to register. Username %s is taken.", req_username);
         send_response_failure(session->socket, msg);
-        free(user->username);
-        free(user->token);
     }
+    free(req_username);
+    free(token);
 }
 
 void handle_login(SessionData *session)
 {
     // Can only login if not already logged in
-    if (session->state != NEW && session->state != REGISTERED)
+    // UNAUTH is the only state that is not considered authed (future states are implicitly "authed")
+    if (session->state != UNAUTHENTICATED)
     {
         send_response_failure(session->socket, "Failed to login. Please log out of your current account first.");
         return;
@@ -101,19 +97,15 @@ void handle_login(SessionData *session)
     recv(session->socket, req_username, username_len, 0);
 
     req_username[username_len] = '\0';
-    printf("user->username is %s (size %d)\n", req_username, username_len);
+    printf("req_username is %s (size %d)\n", req_username, username_len);
 
     uint16_t token_len = get_req_varlen_value(session->socket);
+
     // Invalid token size = invalid login attempt
     if (token_len != TOKEN_SIZE)
     {
         // Flush the rest of the socket (to prevent misinterpreting remainder as new request)
-        // Disable blocking mode
-        // flags = fcntl(session->socket);
-
-        printf("Flushing socket data\n");
         flush_socket(session->socket);
-        printf("Sending resp failure\n");
         send_response_failure(session->socket, "");
         return;
     }
@@ -136,11 +128,39 @@ void handle_login(SessionData *session)
     }
     else
     {
+        free(req_username);
+        free(req_token);
         send_response_failure(session->socket, "");
         return;
     }
 }
 
-void handle_get_strike_packs(SessionData *session)
+void handle_list_strike_packs(SessionData *session)
 {
+    // Request requires authentication
+    if (session->state != UNAUTHENTICATED)
+    {
+        send_response_failure(session->socket, "You must be logged in to see available strike packs");
+        return;
+    }
+
+    StrikePackList *available_strike_packs = list_strike_packs(session->db_conn, session->user->username);
+    // TODO: Account for failure in the db_accessor. Currently we just quit the server program... can't do this for prod
+    if (NULL == available_strike_packs)
+    {
+        // Success even when no strike packs are returned (not authorized or doesn't exist)
+        // Data field should be blank
+        send_response_success_data(session->socket, 0, NULL);
+    }
+    else
+    {
+        DataBlock **blocks = uniform_list_to_data_blocks((void **)available_strike_packs->strike_packs,
+                                                         available_strike_packs->count,
+                                                         sizeof(StrikePack));
+        send_response_success_data(session->socket,
+                                   available_strike_packs->count,
+                                   blocks);
+        free_data_blocks(blocks, available_strike_packs->count);
+    }
+    return;
 }

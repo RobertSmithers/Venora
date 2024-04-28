@@ -4,9 +4,9 @@ Note the prepended number is necessary for postgres to create this base table be
     Postgres runs the files in alphabetical order
 */
 
-DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS strike_categories;
 
-CREATE TABLE categories (
+CREATE TABLE strike_categories (
     category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(100) UNIQUE
 );

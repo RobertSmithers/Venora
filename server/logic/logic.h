@@ -22,4 +22,4 @@ Carries out logic to attempt to retrieve strike packs
 Sends SUCCESS_DATA with strike pack data on success
 or one of FAILURE, INVALID_REQ, SERVER_ERROR
 */
-void handle_get_strike_packs(SessionData *session);
+void handle_list_strike_packs(SessionData *session);

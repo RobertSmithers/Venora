@@ -3,5 +3,8 @@
 
 PGconn *connect_to_db();
 PGresult *get_categories();
+
 PGresult *get_user(PGconn *conn, char *username);
 int insert_user(PGconn *conn, char *username, char *token);
+
+PGresult *get_strike_packs(PGconn *conn, char *username);

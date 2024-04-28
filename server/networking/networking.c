@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>
+#include <stdint.h>
 
 #include <networking.h>
 
@@ -70,30 +71,65 @@ bool send_response_success(int sock)
     return true;
 }
 
-bool send_response_success_data(int sock, void *data, uint16_t data_len)
+bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock **blocks)
+//**data, uint16_t num_data_blocks, uint16_t data_block_size)
+// Expects the varargs to be of type DataBlock*
 {
-    // TODO: Add function for success_data with multiple data blocks
-    uint8_t *buffer = (uint8_t *)malloc(REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + data_len);
+
+    size_t total_size = 0;
+    for (int i = 0; i < num_data_blocks; i++)
+    {
+        total_size += blocks[i]->size;
+    }
+
+    uint8_t *buffer = (uint8_t *)malloc(REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + (total_size));
     if (buffer == NULL)
     {
         perror("Failed to malloc send buffer");
+        return NULL;
     }
 
     // Construct packet
     // 1) Add response type
     uint16_t response_type = htons(RESPONSE_SUCCESS_DATA);
     memcpy(buffer, &response_type, sizeof(response_type));
-
-    // TODO: Define a shared type/size for the packet blocks (ex: REQ_DATA_VARLEN_SIZE = uint16_t type of thing)
-    // 2) Add data len
     uint16_t offset = REQ_RESP_TYPE_SIZE;
-    uint16_t data_len_net = htons(data_len);
-    memcpy(&buffer[offset], &data_len_net, sizeof(data_len_net));
-    offset += REQ_DATA_VARLEN_SIZE;
 
-    // 3) Add data
-    memcpy(&buffer[offset], data, data_len);
-    offset += data_len;
+    for (int i = 0; i < num_data_blocks; i++)
+    {
+        // TODO: Define a shared type/size for the packet blocks (ex: REQ_DATA_VARLEN_SIZE = uint16_t type of thing)
+
+        // 2) Add data len
+        uint16_t data_len_net = htons(blocks[i]->size);
+        memcpy(&buffer[offset], &data_len_net, sizeof(data_len_net));
+        offset += REQ_DATA_VARLEN_SIZE; // The uint16_t above
+
+        // 3) Add data
+        memcpy(&buffer[offset], (void *)blocks[i]->data, blocks[i]->size);
+        offset += blocks[i]->size;
+
+    } // 4) Repeat 2. and 3. for every data block
+
+    // If there is no data to send (such as no strike packs available)
+    // This function may still be called over send_response_success
+    // In this case, we send a data block size of 0 with no data after it
+    if (num_data_blocks == 0)
+    {
+        uint8_t *new_buffer = (uint8_t *)realloc(buffer,
+                                                 REQ_RESP_TYPE_SIZE +
+                                                     REQ_DATA_VARLEN_SIZE +
+                                                     sizeof(uint16_t)); // Realloc to add in the space for our data block's length identifier of 0
+        if (NULL == new_buffer)
+        {
+            perror("Memory reallocation failed");
+            free(buffer);
+            return false;
+        }
+        buffer = new_buffer;
+        uint16_t data_len_net = htons(0);
+        memcpy(&buffer[offset], &data_len_net, sizeof(data_len_net));
+        offset += sizeof(REQ_DATA_VARLEN_SIZE);
+    }
 
     // Send the data
     ssize_t sent = send_to_client(sock, buffer, offset, 0);
