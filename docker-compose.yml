@@ -24,24 +24,33 @@ services:
     hostname: db
 
   server: &server
-    build: ./server/
-    env_file: ./server/server.env
+    env_file: "./server/server.env"
+    build:
+      context: ./server/
+      dockerfile: Dockerfile
     volumes:
-      - ./server/secrets/password.txt:/run/secrets/db-password
-    secrets:
-      - db-password
+      - ./server:/srv
+      - ./.vscode/launch.json:/srv/.vscode/launch.json
     ports:
-      - 4321:9393
+      - 9393:9393
+      - 9394:9394
     depends_on:
       - db
     networks:
       - isolated
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
     # restart: always
 
+  # docker-compose run --rm -i -t client
   client:
     build: client/
     # depends_on:
     #   - server
+    stdin_open: true
+    tty: true
     networks:
       - isolated
 

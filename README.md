@@ -7,3 +7,8 @@ Note that due to security, the exploit packages are not publicly available. None
 
 Disclaimer: The software provided here is for educational purposes only. Any use of this software is at your own risk. I make no warranties or representations regarding the accuracy, reliability, or completeness of the software or its output. By using this software, you agree that we shall not be liable for any damages or losses arising from your use of or reliance on the software. Please use this software responsibly and in accordance with all applicable laws and regulations.
 
+## Usage
+
+tty1: `docker-compose up server`
+
+tty2: `docker-compose run --rm -it client`

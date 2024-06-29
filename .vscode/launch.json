@@ -5,6 +5,60 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Attach/Debug Docker C Server",
+      "type": "cppdbg",
+      "request": "attach",
+      "program": "/srv/build/server",
+      // "processId": "${command:pickProcess}",
+      "args": [],
+      "stopAtEntry": true,
+      "cwd": "/srv",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb",
+      "miDebuggerArgs": "",
+      "logging": {
+        "engineLogging": false
+      },
+      "pipeTransport": {
+        "pipeCwd": "${workspaceRoot}",
+        "pipeProgram": "docker.exe",
+        "pipeArgs": ["exec", "-i", "venora-server-1", "sh", "-c"],
+        "debuggerPath": "/usr/bin/gdb"
+      },
+      "sourceFileMap": {
+        "/srv": "${workspaceFolder}/server"
+      },
+      "env": {
+        "DATABASE_USER": "TESTUSER",
+        "DATABASE_PASSWORD": "/run/secrets/db-password"
+      }
+    },
+    // "pipeArgs": [
+    //           "exec",
+    //           "-i",
+    //           "venora-server-1",
+    //           "gdbserver",
+    //           "localhost:9394",
+    //           "/srv/build/server"
+    //         ],
+
+    // {
+    //   "name": "Docker C Server Debug",
+    //   "type": "docker",
+    //   "request": "launch",
+    //   "preLaunchTask": "docker-run: debug"
+    //   // "platform": "C",
+    // },
+    {
       "name": "Python Debugger: Module",
       "type": "debugpy",
       "request": "launch",
