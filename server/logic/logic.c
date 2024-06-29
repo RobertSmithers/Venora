@@ -5,6 +5,7 @@ Contains the main logic that the application uses. Calls the appropriate actions
 #include <logic.h>
 #include <stdint.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 #include "networking/networking.h"
 #include "networking/utils.h"
@@ -28,6 +29,7 @@ void handle_registration(SessionData *session)
         send_response_failure(session->socket, msg);
         return;
     }
+    printf("in handle_registration\n");
 
     // Extract username size and username string
     uint16_t username_len = get_req_varlen_value(session->socket);
@@ -44,21 +46,33 @@ void handle_registration(SessionData *session)
 
     // account *user = session->user;
     char *req_username = (char *)malloc((username_len + 1) * sizeof(char)); // Add space for null terminator char
+    if (NULL == req_username)
+    {
+        perror("failed to malloc req_username during registration\n");
+        return;
+    }
     recv(session->socket, req_username, username_len, 0);
 
     req_username[username_len] = '\0';
 
     printf("req_username is %s (size %d)\n", req_username, username_len);
 
-    char *token = (char *)malloc(TOKEN_SIZE * sizeof(char));
+    char *token = (char *)malloc((TOKEN_SIZE + 1) * sizeof(char));
+    if (NULL == token)
+    {
+        perror("failed to malloc token\n");
+    }
 
     // Do user registration
     if (register_user(session->db_conn, req_username, username_len, token))
     {
         printf("User %s registered successfully\n", req_username);
         printf("Sending token %s\n", token);
-        DataBlock block[1][1] = {{&token, sizeof(token)}};
-        send_response_success_data(session->socket, 1, (DataBlock **)block);
+        DataBlock block;
+        block.data = token;
+        block.size = strlen(token);
+        DataBlock blocks[1] = {block};
+        send_response_success_data(session->socket, 1, (DataBlock *)blocks);
     }
     else
     {
@@ -154,9 +168,9 @@ void handle_list_strike_packs(SessionData *session)
     }
     else
     {
-        DataBlock **blocks = uniform_list_to_data_blocks((void **)available_strike_packs->strike_packs,
-                                                         available_strike_packs->count,
-                                                         sizeof(StrikePack));
+        DataBlock *blocks = uniform_list_to_data_blocks((void **)available_strike_packs->strike_packs,
+                                                        available_strike_packs->count,
+                                                        sizeof(StrikePack));
         send_response_success_data(session->socket,
                                    available_strike_packs->count,
                                    blocks);

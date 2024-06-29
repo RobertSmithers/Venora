@@ -26,4 +26,5 @@ done
 
 echo "PostgreSQL is ready. Starting server..."
 
+# valgrind --leak-check=full --track-origins=yes ./build/server
 ./build/server

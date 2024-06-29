@@ -15,4 +15,7 @@ target_include_directories(server PRIVATE ${PostgreSQL_INCLUDE_DIRS})
 
 target_link_libraries(server PRIVATE logic networking database ${PostgreSQL_LIBRARIES})
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 target_compile_options(server PRIVATE -g -Wall)

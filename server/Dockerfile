@@ -12,12 +12,9 @@ ENV PROJECT_SRVHOME=/srv
 WORKDIR $PROJECT_SRVHOME
 RUN mkdir logs
 
-ADD . ${PROJECT_SRVHOME}
-
-# WORKDIR $PROJECT_SRVHOME
+# ADD . ${PROJECT_SRVHOME}
 
 EXPOSE 9393
-RUN ls
 # RUN export DB_PASSWORD="$DB_PASS"
 # "export DB_PASSWORD=$(cat /run/secrets/db-password)"
 

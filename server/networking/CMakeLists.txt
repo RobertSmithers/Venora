@@ -10,3 +10,4 @@ add_library(networking
 
 # Include it
 target_include_directories(networking PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(networking PRIVATE -g -Wall)

@@ -9,12 +9,12 @@
       "type": "cppdbg",
       "request": "attach",
       "program": "/srv/build/server",
-      // "processId": "${command:pickProcess}",
-      "args": [],
-      "stopAtEntry": true,
-      "cwd": "/srv",
-      "environment": [],
-      "externalConsole": false,
+      "processId": "${command:pickRemoteProcess}",
+      // "args": [],
+      // "stopAtEntry": true,
+      // "cwd": "/srv",
+      // "environment": [],
+      // "externalConsole": false,
       "MIMode": "gdb",
       "setupCommands": [
         {
@@ -26,22 +26,26 @@
       "miDebuggerPath": "/usr/bin/gdb",
       "miDebuggerArgs": "",
       "logging": {
-        "engineLogging": false
+        "engineLogging": true,
+        "traceResponse": true
       },
       "pipeTransport": {
         "pipeCwd": "${workspaceRoot}",
-        "pipeProgram": "docker.exe",
+        "pipeProgram": "docker",
         "pipeArgs": ["exec", "-i", "venora-server-1", "sh", "-c"],
         "debuggerPath": "/usr/bin/gdb"
       },
       "sourceFileMap": {
-        "/srv": "${workspaceFolder}/server"
-      },
-      "env": {
-        "DATABASE_USER": "TESTUSER",
-        "DATABASE_PASSWORD": "/run/secrets/db-password"
+        "/srv": {
+          "editorPath": "${workspaceRoot}/server",
+          "useForBreakpoints": false
+        }
       }
     },
+    // "sourceFileMap": {
+    //     "/srv": "${workspaceRoot}/server",
+    //     "/srv/networking": "${workspaceRoot}/server/networking"
+    //   }
     // "pipeArgs": [
     //           "exec",
     //           "-i",

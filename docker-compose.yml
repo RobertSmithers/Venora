@@ -30,7 +30,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./server:/srv
-      - ./.vscode/launch.json:/srv/.vscode/launch.json
+      # - ./.vscode/launch.json:/srv/.vscode/launch.json
     ports:
       - 9393:9393
       - 9394:9394

@@ -9,10 +9,13 @@ if [ -d $cmake_dir ]; then
     PATH="${PATH:+"$PATH:"}$cmake_dir"
 fi
 
-rm -r build/
+if [ -d "build/" ]; then
+    rm -r build/
+fi
+
 mkdir build
 cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Debug
 make
 
 if [ $? -eq 0 ]

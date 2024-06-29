@@ -58,6 +58,7 @@ void handle_client(int sock, PGconn *db_conn)
         recv(session->socket, &request_type, REQ_RESP_TYPE_SIZE, 0);
         request_type = ntohs(request_type);
 
+        printf("Got a request\n");
         switch (request_type)
         {
         case REQUEST_REGISTER:

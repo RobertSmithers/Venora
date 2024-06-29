@@ -71,7 +71,7 @@ bool send_response_success(int sock)
     return true;
 }
 
-bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock **blocks)
+bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock *blocks)
 //**data, uint16_t num_data_blocks, uint16_t data_block_size)
 // Expects the varargs to be of type DataBlock*
 {
@@ -79,10 +79,15 @@ bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock **
     size_t total_size = 0;
     for (int i = 0; i < num_data_blocks; i++)
     {
-        total_size += blocks[i]->size;
+        if (blocks[i].size < 0 || blocks[i].size > 100000)
+        {
+            perror("cmon dude, block is negative\n");
+        }
+        total_size += blocks[i].size;
     }
+    printf("Before malloc send buffer (%ld)\n", REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + total_size);
 
-    uint8_t *buffer = (uint8_t *)malloc(REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + (total_size));
+    uint8_t *buffer = (uint8_t *)malloc(REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + total_size);
     if (buffer == NULL)
     {
         perror("Failed to malloc send buffer");
@@ -100,13 +105,13 @@ bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock **
         // TODO: Define a shared type/size for the packet blocks (ex: REQ_DATA_VARLEN_SIZE = uint16_t type of thing)
 
         // 2) Add data len
-        uint16_t data_len_net = htons(blocks[i]->size);
+        uint16_t data_len_net = htons(blocks[i].size);
         memcpy(&buffer[offset], &data_len_net, sizeof(data_len_net));
         offset += REQ_DATA_VARLEN_SIZE; // The uint16_t above
 
         // 3) Add data
-        memcpy(&buffer[offset], (void *)blocks[i]->data, blocks[i]->size);
-        offset += blocks[i]->size;
+        memcpy(&buffer[offset], (void *)blocks[i].data, blocks[i].size);
+        offset += blocks[i].size;
 
     } // 4) Repeat 2. and 3. for every data block
 

@@ -27,7 +27,7 @@ bool send_response_success(int sock);
 Send a response to the client with the Response Type of Success Data
 Data field follows with the pattern of data size | data ...
 */
-bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock **blocks);
+bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock *blocks);
 // bool send_response_success_data(int sock, void **data, uint16_t num_data_blocks, uint16_t data_block_size);
 
 /*
