@@ -45,9 +45,9 @@ void handle_client(int sock, PGconn *db_conn)
     // Create session data
     SessionData *session = (SessionData *)malloc(sizeof(SessionData));
 
-    session->socket = c_sock;                           // c_sock;
-    session->user = (account *)malloc(sizeof(account)); // user;
-    session->state = UNAUTHENTICATED;                   // curr_state;
+    session->socket = c_sock;
+    session->user = (account *)malloc(sizeof(account));
+    session->state = UNAUTHENTICATED;
     session->db_conn = db_conn;
 
     while (!socket_closed(session->socket))

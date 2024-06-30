@@ -72,17 +72,11 @@ bool send_response_success(int sock)
 }
 
 bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock *blocks)
-//**data, uint16_t num_data_blocks, uint16_t data_block_size)
-// Expects the varargs to be of type DataBlock*
 {
 
     size_t total_size = 0;
     for (int i = 0; i < num_data_blocks; i++)
     {
-        if (blocks[i].size < 0 || blocks[i].size > 100000)
-        {
-            perror("cmon dude, block is negative\n");
-        }
         total_size += blocks[i].size;
     }
     printf("Before malloc send buffer (%ld)\n", REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + total_size);
