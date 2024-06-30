@@ -54,7 +54,7 @@ def recv_from_srv(sock: socket.socket, num_bytes: int = CHUNK_SIZE, verbose: boo
 
         if verbose:
             # Output to logs and console
-            logger.info("Received: %s", data)
+            logger.debug("Received: %s", data)
         return data
 
     except socket.error as e:

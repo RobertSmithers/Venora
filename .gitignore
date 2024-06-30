@@ -67,5 +67,5 @@ build/
 # Secrets & Non-Public
 *.env
 hidden/
-db/secrets/
+*/secrets/
 *.BAK

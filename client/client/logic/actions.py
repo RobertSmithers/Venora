@@ -2,7 +2,7 @@
 
 import socket
 import logging
-from typing import List, Any
+from typing import List
 
 from client.networking.comms import send_to_srv, recv_from_srv
 from client.networking.schema import RequestType
@@ -40,7 +40,7 @@ def send_login_request(sock: socket.socket, username: str, token: str, verbose: 
     Creates and sends a login request to the server
     """
     data = {"username": username, "token": token}
-    req = pack_req(RequestType.REGISTER, data)
+    req = pack_req(RequestType.AUTHENTICATE, data)
     if req:
         send_to_srv(sock, req, verbose=verbose)
     else:

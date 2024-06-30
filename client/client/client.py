@@ -46,6 +46,7 @@ def run_client() -> None:
         logger.error("Could not parse server port number")
         return
 
+    # TODO: If ip is a hostname, get the ip and display that
     logger.info(f"Connecting to Venora Server ({ip}:{port})")
     c_sock = connect_to_server(ip, port)
     # If fail to connect, retry one time after a timeout

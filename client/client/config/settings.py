@@ -15,7 +15,7 @@ CHUNK_SIZE = 1024
 default_settings = {
     'log_file': LOG_FILENAME,
     'verbose': False,
-    'server_ip': '127.0.0.1',
+    'server_ip': 'server',  # Hostname of docker container
     'server_port': 9393,
 }
 

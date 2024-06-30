@@ -19,28 +19,50 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    networks:
+      - isolated
+    hostname: db
 
   server: &server
-    build: server/
-    env_file: ./server/server.env
-    command:
-      - cat
-      - build.sh
+    env_file: "./server/server.env"
+    build:
+      context: ./server/
+      dockerfile: Dockerfile
+    volumes:
+      - ./server:/srv
+      # - ./.vscode/launch.json:/srv/.vscode/launch.json
     ports:
-      - 4321:9393
-    # depends_on:
-    #   - postgres
+      - 9393:9393
+      - 9394:9394
+    depends_on:
+      - db
+    networks:
+      - isolated
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
     # restart: always
 
+  # docker-compose run --rm -i -t client
   client:
     build: client/
-    command: ./install_client_pkg.sh && venora-client
-    network_mode: host
-    depends_on:
-      - server
+    # depends_on:
+    #   - server
+    stdin_open: true
+    tty: true
+    networks:
+      - isolated
 
 volumes:
   pgdata:
 secrets:
   db-password:
     file: db/secrets/password.txt
+
+# Until I figure out a way to automate this connection a little better (maybe hostname instead of IP for connect?)
+# To view network for container IPs (for connections)
+# docker inspect venora_isolated
+networks:
+  isolated:
+    driver: bridge

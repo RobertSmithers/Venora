@@ -1,16 +1,17 @@
 # Creates the server environment
 FROM gcc:latest
 
+RUN apt-get update && \
+    apt-get install -y \
+    cmake postgresql-client valgrind gdb build-essential \
+    gdbserver iputils-ping
+
 # Env vars for srv dir subfolders
 ENV PROJECT_SRVHOME=/srv
 
 WORKDIR $PROJECT_SRVHOME
 RUN mkdir logs
 
-ADD . ${PROJECT_SRVHOME}
+EXPOSE 9393
 
-WORKDIR $PROJECT_SRVHOME
-
-# RUN gcc -o server server.c
-
-# CMD ["./server"]
+CMD ["/bin/bash", "-c", "./build.sh && ./start_srv_after_db.sh"]

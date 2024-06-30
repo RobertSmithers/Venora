@@ -11,6 +11,6 @@ DROP TABLE IF EXISTS account;
 CREATE TABLE account(
     account_id SERIAL PRIMARY KEY,
     username varchar(40) NOT NULL UNIQUE,
-    email varchar(60) NOT NULL UNIQUE,
+    email varchar(60) UNIQUE,
     token varchar(40) NOT NULL UNIQUE
 );

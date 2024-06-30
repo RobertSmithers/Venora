@@ -60,7 +60,7 @@ def test_connect_to_server_invalid_ip(server_ip, server_port):
 def test_recv_from_srv_different_verbosity(
         mock_socket, caplog, verbose, expected_result):
     """tests connect to server prints the received data when verbose is set"""
-    with caplog.at_level(logging.INFO):
+    with caplog.at_level(logging.DEBUG):
         with patch.object(mock_socket, "recv", return_value=b"test_data") as mock_recv:
             result = recv_from_srv(mock_socket, 1024, verbose)
 

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-bool register_user(char *username, uint16_t username_len, char *token);
-void login(char *username, uint16_t username_len, char *token, uint16_t token_len);
-void get_strike_packs();
+#include "database/db_structs.h"
+
+bool register_user(PGconn *db_conn, char *username, uint16_t username_len, char *token);
+bool login(PGconn *db_conn, char *username, char *token);
+StrikePackList *list_strike_packs(PGconn *db_conn, char *usernam);
