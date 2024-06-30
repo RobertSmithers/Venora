@@ -67,16 +67,9 @@ bool login(PGconn *db_conn, char *username, char *token)
     // Free the data
     PQclear(pg_user_data);
 
-    // for (int i = 0; i < numRows; i++)
-    // {
-    //     printf("Category ID: %s, Category Name: %s\n",
-    //            PQgetvalue(res, i, 0),
-    //            PQgetvalue(res, i, 1));
-    //     retVals[i] = (char *)malloc(sizeof(char *));
-    // }
     // Should only need to compare token, but get_user function return values may change before release
-    if (strncmp(pg_username, username, MAX_USERNAME_LEN) &&
-        strncmp(pg_token, token, TOKEN_SIZE))
+    if (strncmp(pg_username, username, MAX_USERNAME_LEN) == 0 &&
+        strncmp(pg_token, token, TOKEN_SIZE) == 0)
     {
         return true;
     }
@@ -91,6 +84,11 @@ bool login(PGconn *db_conn, char *username, char *token)
 StrikePackList *list_strike_packs(PGconn *db_conn, char *username)
 {
     PGresult *pg_data = get_strike_packs(db_conn, username);
+    if (NULL == pg_data)
+    {
+        printf("Error accessing strike pack data from database\n");
+        return NULL;
+    }
     int numRows = PQntuples(pg_data);
 
     // If there are no rows, user cannot see any strike packs or none exist

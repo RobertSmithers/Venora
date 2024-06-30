@@ -163,7 +163,7 @@ PGresult *get_strike_packs(PGconn *conn, char *username)
         fprintf(stderr, "Query execution failed: %s\n", PQerrorMessage(conn));
         PQclear(res);
         PQfinish(conn);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     return res;

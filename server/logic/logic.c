@@ -152,18 +152,18 @@ void handle_login(SessionData *session)
 void handle_list_strike_packs(SessionData *session)
 {
     // Request requires authentication
-    if (session->state != UNAUTHENTICATED)
+    if (session->state != AUTHENTICATED)
     {
         send_response_failure(session->socket, "You must be logged in to see available strike packs");
         return;
     }
 
     StrikePackList *available_strike_packs = list_strike_packs(session->db_conn, session->user->username);
-    // TODO: Account for failure in the db_accessor. Currently we just quit the server program... can't do this for prod
     if (NULL == available_strike_packs)
     {
-        // Success even when no strike packs are returned (not authorized or doesn't exist)
+        // Success even when no strike packs are returned (packs not authorized or doesn't exist)
         // Data field should be blank
+        // Note: We may get here if there is a db failure as well. Maybe in future I account for this to the user/log it better for self
         send_response_success_data(session->socket, 0, NULL);
     }
     else
