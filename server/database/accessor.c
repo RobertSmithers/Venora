@@ -73,8 +73,6 @@ PGresult *get_categories(PGconn *conn)
 PGresult *get_user(PGconn *conn, char *username)
 {
     const char *param_values[1] = {username};
-    // int param_lengths[1] = {strlen(username)};
-    // int param_formats[1] = {0};
 
     // Execute query and store result
     PGresult *res = PQexecParams(conn,

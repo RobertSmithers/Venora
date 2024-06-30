@@ -15,6 +15,8 @@ fi
 
 mkdir build
 cd build
+
+# TODO: Add custom flags to build script for add'l cmake options
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 make
 
