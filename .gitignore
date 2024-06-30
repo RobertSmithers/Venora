@@ -69,3 +69,7 @@ build/
 hidden/
 */secrets/
 *.BAK
+db/strike_packs/
+attacks/
+venv
+db/ddl/7_inserts.sql

@@ -23,6 +23,18 @@ services:
       - isolated
     hostname: db
 
+  db-admin-api:
+    build: ./db-admin-api
+    environment:
+      FLASK_ENV: development
+      # DATABASE_URL: postgres://yourdbuser:yourdbpassword@db:5432/yourdbname
+    secrets:
+      - db-password
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+
   server: &server
     env_file: "./server/server.env"
     build:

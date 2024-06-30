@@ -79,7 +79,6 @@ bool send_response_success_data(int sock, uint16_t num_data_blocks, DataBlock *b
     {
         total_size += blocks[i].size;
     }
-    printf("Before malloc send buffer (%ld)\n", REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + total_size);
 
     uint8_t *buffer = (uint8_t *)malloc(REQ_RESP_TYPE_SIZE + REQ_DATA_VARLEN_SIZE + total_size);
     if (buffer == NULL)
