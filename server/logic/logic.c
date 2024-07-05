@@ -64,7 +64,7 @@ void handle_registration(SessionData *session)
     }
 
     // Do user registration
-    if (register_user(session->db_conn, req_username, username_len, token))
+    if (register_user(req_username, username_len, token))
     {
         printf("User %s registered successfully\n", req_username);
         printf("Sending token %s\n", token);
@@ -130,8 +130,7 @@ void handle_login(SessionData *session)
     recv(session->socket, req_token, token_len, 0);
 
     // Attempt to authenticate
-    if (login(session->db_conn,
-              req_username,
+    if (login(req_username,
               req_token))
     {
         session->user->username = req_username;
@@ -158,7 +157,7 @@ void handle_list_strike_packs(SessionData *session)
         return;
     }
 
-    StrikePackList *available_strike_packs = list_strike_packs(session->db_conn, session->user->username);
+    StrikePackList *available_strike_packs = list_strike_packs(session->user->username);
     if (NULL == available_strike_packs)
     {
         // Success even when no strike packs are returned (packs not authorized or doesn't exist)

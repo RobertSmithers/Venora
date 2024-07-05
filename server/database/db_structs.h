@@ -1,3 +1,4 @@
+#include <stdint.h>
 
 typedef struct StrikePack_t
 {

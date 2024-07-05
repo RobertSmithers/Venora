@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <errno.h>
-#include <libpq-fe.h>
 
 #include "networking/schema.h"
 #include "networking/networking.h"
@@ -18,7 +17,7 @@
 #define MAX_CLIENTS 5
 #define BUFFER_SIZE 1024
 
-// TODO: Handle mutex/concurrency (with PGConn as well)
+// TODO: Handle mutex/concurrency
 short client_count = 0;
 
 bool socket_closed(int sock)
@@ -37,9 +36,8 @@ bool socket_closed(int sock)
     return false;
 }
 
-void handle_client(int sock, PGconn *db_conn)
+void handle_client(int sock)
 {
-    // char buffer[BUFFER_SIZE];
     int c_sock = sock;
 
     // Create session data
@@ -48,7 +46,6 @@ void handle_client(int sock, PGconn *db_conn)
     session->socket = c_sock;
     session->user = (account *)malloc(sizeof(account));
     session->state = UNAUTHENTICATED;
-    session->db_conn = db_conn;
 
     while (!socket_closed(session->socket))
     {
@@ -95,26 +92,17 @@ void handle_client(int sock, PGconn *db_conn)
     client_count--;
 }
 
-void cleanup(PGconn *conn)
-{
-    PQfinish(conn);
-}
-
 int main()
 {
     setbuf(stdout, NULL);
     printf("I am a server. I am A SERVER. I am A SERVER. I AM A SERVER!\n");
 
-    // Before setting up server connection, initiate a connection to the database
-    // NOTE: conn is passed to each handle_client thread and must be synchronized with a mutex
-    // (TODO: maybe a semaphore would be a good approach here)
-    PGconn *db_conn = connect_to_db();
-    if (NULL == db_conn)
+    // Before setting up server connection, verify connection to the database
+    if (!is_db_online())
     {
-        perror("Database connection failed");
+        perror("Database is offline or unreachable");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to database\n");
 
     int server_socket,
         client_socket;
@@ -126,7 +114,6 @@ int main()
     if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         perror("Socket creation failed");
-        cleanup(db_conn);
         exit(EXIT_FAILURE);
     }
 
@@ -135,7 +122,6 @@ int main()
     {
         perror("Setting SO_REUSEADDR failed");
         close(server_socket);
-        cleanup(db_conn);
         exit(EXIT_FAILURE);
     }
 
@@ -149,14 +135,12 @@ int main()
     if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) == -1)
     {
         perror("Socket bind failed");
-        cleanup(db_conn);
         exit(EXIT_FAILURE);
     }
 
     if (listen(server_socket, 5) == -1)
     {
         perror("Socket listen failed");
-        cleanup(db_conn);
         exit(EXIT_FAILURE);
     }
 
@@ -175,12 +159,11 @@ int main()
         printf("Client connected: %s\n", inet_ntoa(client_address.sin_addr));
         client_count++;
         printf("TODO: Thread out to handle_client\n\n");
-        handle_client(client_socket, db_conn);
+        handle_client(client_socket);
     }
 
     // Close the server socket
     close(server_socket);
-    cleanup(db_conn);
 
     return 0;
 }

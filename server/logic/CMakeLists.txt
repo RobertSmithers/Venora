@@ -1,4 +1,3 @@
-# Create a library for the folder
 add_library(logic
     actions.c
     actions.h
@@ -7,6 +6,13 @@ add_library(logic
     session_data.h
 )
 
-# Include it
-target_include_directories(logic PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PostgreSQL_INCLUDE_DIRS} networking)
+target_include_directories(logic PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/networking
+    ${CMAKE_SOURCE_DIR}/database
+    ${JSON-C_INCLUDE_DIRS}
+    ${CURL_INCLUDE_DIRS}
+    )
+target_link_libraries(logic PRIVATE ${CURL_LIBRARIES} ${JSON-C_LIBRARIES})
 target_compile_options(logic PRIVATE -g -Wall)

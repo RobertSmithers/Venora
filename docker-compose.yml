@@ -23,17 +23,20 @@ services:
       - isolated
     hostname: db
 
-  db-admin-api:
-    build: ./db-admin-api
+  db-accessor-api:
+    build: ./db-accessor-api
     environment:
       FLASK_ENV: development
-      # DATABASE_URL: postgres://yourdbuser:yourdbpassword@db:5432/yourdbname
+    env_file: ./db/db.env
     secrets:
       - db-password
     depends_on:
       - db
+    networks:
+      - isolated
     ports:
-      - "5000:5000"
+      - "5000:80"
+    hostname: "db-accessor"
 
   server: &server
     env_file: "./server/server.env"
@@ -42,12 +45,11 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./server:/srv
-      # - ./.vscode/launch.json:/srv/.vscode/launch.json
     ports:
       - 9393:9393
       - 9394:9394
     depends_on:
-      - db
+      - db-accessor-api
     networks:
       - isolated
     cap_add:
@@ -70,7 +72,7 @@ volumes:
   pgdata:
 secrets:
   db-password:
-    file: db/secrets/password.txt
+    file: ./db/secrets/password.txt
 
 # Until I figure out a way to automate this connection a little better (maybe hostname instead of IP for connect?)
 # To view network for container IPs (for connections)

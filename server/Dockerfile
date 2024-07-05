@@ -3,7 +3,8 @@ FROM gcc:latest
 
 RUN apt-get update && \
     apt-get install -y \
-    cmake postgresql-client valgrind gdb build-essential \
+    libcurl4-openssl-dev libjson-c-dev cmake build-essential \
+    postgresql-client valgrind gdb liblog4c-dev \
     gdbserver iputils-ping
 
 # Env vars for srv dir subfolders

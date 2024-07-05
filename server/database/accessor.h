@@ -1,10 +1,11 @@
 #include <stdio.h>
-#include <libpq-fe.h>
+// #include <libpq-fe.h>
 
-PGconn *connect_to_db();
-PGresult *get_categories();
+char *get_categories();
 
-PGresult *get_user(PGconn *conn, char *username);
-int insert_user(PGconn *conn, char *username, char *token);
+char *get_user(char *username);
+char *insert_user(char *username, char *token);
 
-PGresult *get_strike_packs(PGconn *conn, char *username);
+char *get_strike_packs(char *username);
+
+char *get_health();
