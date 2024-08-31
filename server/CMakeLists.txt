@@ -26,21 +26,14 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 
-# Add the found include directory to the include paths
-# target_include_directories(server PRIVATE
-#     ${JSON-C_INCLUDE_DIRS}
-#     ${CURL_INCLUDE_DIRS}
-#     ${CMAKE_SOURCE_DIR}/database
-# )
-# include_directories(logic networking database ${JSON-C_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/logic ${CMAKE_SOURCE_DIR}/database ${CURL_INCLUDE_DIRS} ${JSON-C_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/logic ${CMAKE_SOURCE_DIR}/database ${CURL_INCLUDE_DIRS} ${JSON-C_INCLUDE_DIRS})
 
 
 add_subdirectory(logic)
 add_subdirectory(networking)
 add_subdirectory(database)
 
-add_executable(server server.c)
+add_executable(server server.c log.c)
 
 target_link_libraries(server PRIVATE logic networking database ${JSON-C_LIBRARIES} ${CURL_LIBRARIES})
 

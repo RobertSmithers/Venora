@@ -12,5 +12,7 @@ CREATE TABLE account(
     account_id SERIAL PRIMARY KEY,
     username varchar(40) NOT NULL UNIQUE,
     email varchar(60) UNIQUE,
-    token varchar(40) NOT NULL UNIQUE
+    token varchar(40) UNIQUE,
+    salt VARCHAR(60) NOT NULL,
+    passhash VARCHAR(60) NOT NULL
 );

@@ -11,11 +11,11 @@ from client.networking.packer import pack_req, unpack_response_type, unpack_type
 logger = logging.getLogger(__name__)
 
 
-def send_register_request(sock: socket.socket, username: str, verbose: bool = False) -> None:
+def send_register_request(sock: socket.socket, username: str, password: str, verbose: bool = False) -> None:
     """
     Creates and sends a register request to the server
     """
-    data = {"username": username}
+    data = {"username": username, "password": password}
     req = pack_req(RequestType.REGISTER, data)
     if req:
         send_to_srv(sock, req, verbose=verbose)
@@ -35,11 +35,11 @@ def receive_register_response(sock: socket.socket, verbose: bool = False) -> Lis
     return unpack_type(sock, resp_type, RequestType.REGISTER)
 
 
-def send_login_request(sock: socket.socket, username: str, token: str, verbose: bool = False) -> None:
+def send_login_request(sock: socket.socket, username: str, password: str, verbose: bool = False) -> None:
     """
     Creates and sends a login request to the server
     """
-    data = {"username": username, "token": token}
+    data = {"username": username, "password": password}
     req = pack_req(RequestType.AUTHENTICATE, data)
     if req:
         send_to_srv(sock, req, verbose=verbose)

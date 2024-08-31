@@ -8,6 +8,7 @@ import logging
 import socket
 
 from typing import Dict
+import getpass
 
 import cmd2
 from client.config.logs import GREEN_COLOR_START, RED_COLOR_START, COLOR_END
@@ -46,6 +47,7 @@ class ClientCmd(cmd2.Cmd):
 
         self.sock = sock
         self.settings = settings
+        self.session_token = None
 
     def do_connect(self, args):
         """Connect to Verona Server
@@ -92,17 +94,25 @@ class ClientCmd(cmd2.Cmd):
         username = arg.strip()
         if username:
             # try:
-            send_register_request(self.sock, username, True)
+            # Get password
+            password = getpass.getpass("Password: ")
+            password2 = getpass.getpass("Confirm Password: ")
+            if password != password2:
+                logger.error("Passwords do not match.")
+                return
+
+            send_register_request(self.sock, username, password, True)
             response = receive_register_response(self.sock, True)
             base_response_handler(
                 response, [ResponseType.SUCCESS_DATA, ResponseType.FAILURE])
             status = response[0]
             if status == ResponseType.SUCCESS_DATA:
                 [_, token] = response
-                resp_text_prompt = f"User '{username}' registered successfully. Please save your account's private token, it is only sent once!\nYou may now login"
+                resp_text_prompt = f"User '{username}' registered successfully. Please save your account's password, it cannot be recovered!\nYou are now logged in"
                 logger.info(resp_text_prompt)
                 # Using stdout to prevent token artifact in logs
-                print(GREEN_COLOR_START + "Token: " + token + COLOR_END)
+                # print(GREEN_COLOR_START + "Token: " + token + COLOR_END)
+                self.session_token = token
             elif status == ResponseType.FAILURE:
                 [_, msg] = response
                 logger.error("SERVER - %s", msg)
@@ -122,24 +132,30 @@ class ClientCmd(cmd2.Cmd):
             logger.warn("You must connect to a server before logging in.")
             return
 
-        if not args.arg_list or len(args.arg_list) != 2:
-            logging.error("Usage: login [username] [token]")
+        if not args.arg_list or len(args.arg_list) != 1:
+            logging.error("Usage: login [username]")
             return
 
-        username, token = args.arg_list
-        if username and token:
+        username = args.arg_list[0]
+        if username:
+            password = getpass.getpass("Password: ")
             try:
-                send_login_request(self.sock, username, token, True)
+                send_login_request(self.sock, username, password, True)
                 resp = receive_login_response(self.sock, True)
+
+                # Validate response types
                 base_response_handler(
-                    resp, [ResponseType.FAILURE, ResponseType.SUCCESS])
-                if (resp[0] == ResponseType.FAILURE):
+                    resp, [ResponseType.FAILURE, ResponseType.SUCCESS_DATA])
+                status = resp[0]
+                if (status == ResponseType.FAILURE):
                     if (len(resp) > 1):
                         print(RED_COLOR_START + "Login failed: " +
                               str(resp[1]) + COLOR_END)
                     else:
                         print(RED_COLOR_START + "Login failed" + COLOR_END)
-                elif (resp[0] == ResponseType.SUCCESS):
+                elif (status == ResponseType.SUCCESS_DATA):
+                    [_, token] = resp
+                    self.session_token = token
                     print(GREEN_COLOR_START + "Login successful!" + COLOR_END)
             except:
                 logger.error(

@@ -7,7 +7,7 @@ import sys
 import socket
 from typing import Any, Dict, Optional, List
 
-from client.config.settings import USERNAME_MAX_CHARS
+from client.config.settings import USERNAME_MAX_CHARS, PASSWORD_MAX_CHARS
 from client.networking.schema import RequestType, ResponseType
 from client.networking.comms import recv_from_srv
 
@@ -35,10 +35,11 @@ def pack_type_register(data: dict) -> Optional[bytes]:
             char[]          - username
     """
     username = data.get("username")
+    password = data.get("password")
     # TODO: Refactor these into a validate_fields func, validate_username_sz
-    if not username:
+    if not username or not password:
         logger.error(
-            "Failed to pack register request - no username provided")
+            "Failed to pack register request - no username or password provided")
         return None
     user_len = len(username)
     if user_len > USERNAME_MAX_CHARS:
@@ -47,7 +48,14 @@ def pack_type_register(data: dict) -> Optional[bytes]:
             USERNAME_MAX_CHARS
         )
         return None
-    return struct.pack(f"!HH{user_len}s", RequestType.REGISTER.value, user_len, username.encode())
+    pass_len = len(password)
+    if pass_len > PASSWORD_MAX_CHARS:
+        logger.error(
+            "Failed to pack register request - password too long (> %d chars)",
+            PASSWORD_MAX_CHARS
+        )
+        return None
+    return struct.pack(f"!HH{user_len}sH{pass_len}s", RequestType.REGISTER.value, user_len, username.encode(), pass_len, password.encode())
 
 
 def pack_type_authenticate(data: dict) -> Optional[bytes]:
@@ -55,7 +63,7 @@ def pack_type_authenticate(data: dict) -> Optional[bytes]:
     packs data for the authenticate request
 
     Args:
-        data (dict): Dictionary with 'username' and 'token'
+        data (dict): Dictionary with 'username' and 'password'
 
     Returns:
         None if error, otherwise
@@ -63,8 +71,8 @@ def pack_type_authenticate(data: dict) -> Optional[bytes]:
             unsigned short  - RequestType
             unsigned short  - Number of username bytes
             char[]          - username
-            unsigned short  - Number of token bytes
-            char[]          - token
+            unsigned short  - Number of password bytes
+            char[]          - password
     """
     username = data.get("username")
     if not username:
@@ -78,18 +86,18 @@ def pack_type_authenticate(data: dict) -> Optional[bytes]:
             USERNAME_MAX_CHARS
         )
         return None
-    token = data.get("token")
-    if not token:
+    password = data.get("password")
+    if not password:
         logger.error(
-            "Failed to pack an authenticate request - no token provided")
+            "Failed to pack an authenticate request - no password provided")
         return None
-    token_len = len(token)
-    return struct.pack(f"!HH{user_len}sH{token_len}s",
+    password_len = len(password)
+    return struct.pack(f"!HH{user_len}sH{password_len}s",
                        RequestType.AUTHENTICATE.value,
                        user_len,
                        username.encode(),
-                       token_len,
-                       token.encode()
+                       password_len,
+                       password.encode()
                        )
 
 
@@ -205,6 +213,8 @@ def unpack_type_success_data(sock: socket.socket, req_type: RequestType) -> List
         print(f"There are {num_blocks} data fields")
         out_data = _get_data_blocks(sock, num_blocks)
     elif req_type == RequestType.REGISTER:
+        out_data = _get_data_blocks(sock, 1)
+    elif req_type == RequestType.AUTHENTICATE:
         out_data = _get_data_blocks(sock, 1)
     else:
         logger.warning(

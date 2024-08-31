@@ -4,6 +4,8 @@ add_library(logic
     logic.h
     logic.c
     session_data.h
+    json-parser.h
+    json-parser.c 
 )
 
 target_include_directories(logic PRIVATE

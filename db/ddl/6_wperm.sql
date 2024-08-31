@@ -8,6 +8,6 @@ DROP TABLE IF EXISTS wperm;
 CREATE TABLE wperm(
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(40),
-    salt VARCHAR(16),
+    salt VARCHAR(30),
     passhash VARCHAR(256) 
 );

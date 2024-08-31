@@ -1,14 +1,9 @@
 #!/bin/bash
 
-# Move db-api certs to enable SSL connection
-echo "Loading db-api's SSL certs"
-if [ ! -f "/srv/SSL/server.crt" ]; then
-    echo "server.crt not found! Won't run without SSL"
-    exit 1
-else
-    cp /srv/SSL/server.crt /usr/local/share/ca-certificates/db-accessor-api.crt
-    update-ca-certificates
-fi
+# Setup certs first
+cd SSL/
+./setup-ssl-key.sh
+cd ..
 
 # PostgreSQL connection parameters
 PGHOST="db"
@@ -23,7 +18,6 @@ RETRY_INTERVAL=5
 # Check if PostgreSQL is ready
 n=0
 echo "Waiting for PostgreSQL to become ready..."
-echo "WARNING -- All pg connections will soon be prohibited from server. Switch to using the db's API for health checks"
 while ! pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" >/dev/null 2>&1; do
     if [ $n -ge $MAX_RETRIES ]; then
         echo "Max retries exceeded. PostgreSQL is not ready."
@@ -37,5 +31,5 @@ done
 
 echo "PostgreSQL is ready. Starting server..."
 
-# valgrind --leak-check=full --track-origins=yes ./build/server
-./build/server
+# flask run --host=0.0.0.0
+python web-service.py

@@ -3,6 +3,7 @@
 #ifndef account_types
 #define TOKEN_SIZE 32
 #define MAX_USERNAME_LEN 100
+#define MAX_PASSWORD_LEN 50
 #define account_types true
 
 // struct permissions

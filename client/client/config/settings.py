@@ -9,6 +9,7 @@ SETTINGS_FILENAME = "venora_settings.json"
 LOG_FILENAME = "client.log"
 CONNECTION_RETRY_TIME = 3  # in seconds
 USERNAME_MAX_CHARS = 100
+PASSWORD_MAX_CHARS = 50
 
 CHUNK_SIZE = 1024
 

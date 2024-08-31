@@ -23,6 +23,8 @@ make
 if [ $? -eq 0 ]
 then
     echo "Success!"
+    exit 0
 else
     echo "Build failed. Aborting"
+    exit 1
 fi;

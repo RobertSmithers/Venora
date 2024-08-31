@@ -19,4 +19,4 @@ def base_response_handler(resp: List, expected_resp_types: List):
         # All server error responses should have an error code
         logger.error("SERVER - Internal Server Error #%d", resp[1])
     elif (rtype not in expected_resp_types):
-        logger.error("Unexpected response type from server: %d", rtype)
+        logger.error("Unexpected response type from server: %d", rtype.value)

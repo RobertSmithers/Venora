@@ -1,7 +1,8 @@
 FROM python:3.9-slim
 
 RUN apt-get update && apt-get install -y \
-        libpq-dev gcc
+        libpq-dev gcc postgresql-client \
+        iputils-ping 
 
 WORKDIR /app
 
@@ -11,10 +12,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 80
+EXPOSE 443
 
 # Define environment variable for flask
 ENV FLASK_APP=web-service.py
 
 # Run web service when the container launches
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["./start_srv_after_db.sh"]

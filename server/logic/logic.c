@@ -29,7 +29,6 @@ void handle_registration(SessionData *session)
         send_response_failure(session->socket, msg);
         return;
     }
-    printf("in handle_registration\n");
 
     // Extract username size and username string
     uint16_t username_len = get_req_varlen_value(session->socket);
@@ -57,6 +56,28 @@ void handle_registration(SessionData *session)
 
     printf("req_username is %s (size %d)\n", req_username, username_len);
 
+    uint16_t pass_len = get_req_varlen_value(session->socket);
+
+    if (pass_len > MAX_PASSWORD_LEN)
+    {
+        printf("Failed to copy password. Password (%d chars) exceeds %d chars\n", pass_len, MAX_PASSWORD_LEN);
+        char msg[41 + 4]; // 40 chars + 4 char max for password size
+        sprintf(msg, "Password can be a maximum of %d characters", MAX_PASSWORD_LEN);
+        send_response_failure(session->socket, msg);
+        return;
+    }
+
+    char *req_pass = (char *)malloc((pass_len + 1) * sizeof(char));
+    if (NULL == req_pass)
+    {
+        perror("failed to malloc req_pass\n");
+    }
+    recv(session->socket, req_pass, pass_len, 0);
+
+    req_pass[pass_len] = '\0';
+
+    printf("req_pass is %s (size %d)\n", req_pass, pass_len);
+
     char *token = (char *)malloc((TOKEN_SIZE + 1) * sizeof(char));
     if (NULL == token)
     {
@@ -64,10 +85,12 @@ void handle_registration(SessionData *session)
     }
 
     // Do user registration
-    if (register_user(req_username, username_len, token))
+    if (register_user(req_username, username_len, req_pass, pass_len, token))
     {
         printf("User %s registered successfully\n", req_username);
         printf("Sending token %s\n", token);
+        // Send token back to user... user is now logged in
+        session->state = AUTHENTICATED;
         DataBlock block;
         block.data = token;
         block.size = strlen(token);
@@ -113,10 +136,10 @@ void handle_login(SessionData *session)
     req_username[username_len] = '\0';
     printf("req_username is %s (size %d)\n", req_username, username_len);
 
-    uint16_t token_len = get_req_varlen_value(session->socket);
+    uint16_t password_len = get_req_varlen_value(session->socket);
 
     // Invalid token size = invalid login attempt
-    if (token_len != TOKEN_SIZE)
+    if (password_len > MAX_PASSWORD_LEN)
     {
         // Flush the rest of the socket (to prevent misinterpreting remainder as new request)
         flush_socket(session->socket);
@@ -124,25 +147,30 @@ void handle_login(SessionData *session)
         return;
     }
 
-    char *req_token = (char *)malloc(token_len * sizeof(char));
+    char *req_password = (char *)malloc(password_len * sizeof(char));
 
-    // Extract username and token from packet
-    recv(session->socket, req_token, token_len, 0);
+    // Extract username and password from packet
+    recv(session->socket, req_password, password_len, 0);
 
     // Attempt to authenticate
-    if (login(req_username,
-              req_token))
+    const char *token = login_user(req_username, req_password);
+    if (token != NULL)
     {
         session->user->username = req_username;
-        session->user->token = req_token;
+        session->user->token = strdup(token);
         session->state = AUTHENTICATED;
-        send_response_success(session->socket);
+        DataBlock block;
+        block.data = session->user->token;
+        block.size = strlen(token);
+        DataBlock blocks[1] = {block};
+        send_response_success_data(session->socket, 1, (DataBlock *)blocks);
+        free(req_password);
         return;
     }
     else
     {
         free(req_username);
-        free(req_token);
+        free(req_password);
         send_response_failure(session->socket, "");
         return;
     }

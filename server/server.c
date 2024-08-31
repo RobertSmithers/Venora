@@ -10,9 +10,12 @@
 
 #include "networking/schema.h"
 #include "networking/networking.h"
+#include "networking/certificates.c"
+#include "networking/web-utils.h"
 #include "logic/actions.h"
 #include "logic/logic.h"
 #include "database/accessor.h"
+#include "log.h"
 
 #define MAX_CLIENTS 5
 #define BUFFER_SIZE 1024
@@ -95,9 +98,10 @@ void handle_client(int sock)
 int main()
 {
     setbuf(stdout, NULL);
-    printf("I am a server. I am A SERVER. I am A SERVER. I AM A SERVER!\n");
+    log_debug("I am a server. I am A SERVER. I am A SERVER. I AM A SERVER!\n");
 
     // Before setting up server connection, verify connection to the database
+    // This includes verifying SSL certs
     if (!is_db_online())
     {
         perror("Database is offline or unreachable");
@@ -106,6 +110,7 @@ int main()
 
     int server_socket,
         client_socket;
+    // This includes verifying SSL certs
     srand((unsigned int)time(NULL)); // Used for token generation
 
     struct sockaddr_in server_address, client_address;

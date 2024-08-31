@@ -1,11 +1,12 @@
 #include <stdio.h>
+#include <json-c/json.h>
 // #include <libpq-fe.h>
 
-char *get_categories();
+struct json_object *db_get_categories();
 
-char *get_user(char *username);
-char *insert_user(char *username, char *token);
+struct json_object *db_get_user(const char *username);
+struct json_object *db_login_user(const char *username, const char *token);
+struct json_object *db_insert_user(const char *username, const char *password, const char *token);
+struct json_object *db_get_strike_packs(const char *username);
 
-char *get_strike_packs(char *username);
-
-char *get_health();
+struct json_object *db_get_health();

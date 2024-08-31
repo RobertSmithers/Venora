@@ -1,44 +1,49 @@
-import bcrypt
-import psycopg2
-from psycopg2 import OperationalError
+import datetime
+import jwt
 import os
 
-
-conn = None
-
-with open('/run/secrets/db-password', 'r') as f:
-    db_password = f.read().strip()
+from flask_jwt_extended import JWTManager
+from flask import Flask
 
 
-def generate_salt():
-    return bcrypt.gensalt().decode('utf-8')
+class WebApp:
 
+    def __init__(self):
+        self.app = Flask(__name__)
+        self.jwt = JWTManager(self.app)
+        self._configure_app()
 
-def hash_password(password, salt):
-    return bcrypt.hashpw(password.encode('utf-8'), salt.encode('utf-8')).decode('utf-8')
+    def _configure_app(self):
+        self.app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+        self.app.config['JWT_ALGORITHM'] = os.environ.get(
+            'JWT_ALGORITHM', 'HS256')
 
+    # def generate_server_token(self):
+    #     payload = {
+    #         'iss': 'VenoraServer',
+    #         'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+    #     }
+    #     secret = self.app.config['JWT_SECRET_KEY']
+    #     algorithm = self.app.config['JWT_ALGORITHM']
+    #     token = jwt.encode(payload, secret, algorithm=algorithm)
+    #     return token
 
-# Singleton to setup initial connection and reuse for future requests
-def get_conn():
-    global conn
-    if not conn:
-        conn = psycopg2.connect(
-            dbname=os.environ.get("POSTGRES_DB"),
-            user=os.environ.get("POSTGRES_USER"),
-            password=db_password,
-            host="db",
-            port="5432"
-        )
-    return conn
+    def generate_jwt(self, username):
+        payload = {
+            'username': username,
+            'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
+        }
+        return jwt.encode(payload, self.app.config['JWT_SECRET_KEY'], algorithm=self.app.config['JWT_ALGORITHM'])
 
+    def verify_jwt(self, token):
+        try:
+            payload = jwt.decode(
+                token, self.app.config['JWT_SECRET_KEY'], algorithm=self.app.config['JWT_ALGORITHM'])
+            return payload
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenEror:
+            return None
 
-# TODO: We should make our own stateful class to handle our use of psycopg2
-# Will be especially important if we decide to implement threading
-def check_db_connection():
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1")
-        cursor.close()
-        return True
-    except OperationalError:
-        return False
+    def run(self, **kwargs):
+        self.app.run(**kwargs)

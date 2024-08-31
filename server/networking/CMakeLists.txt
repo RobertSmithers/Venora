@@ -6,6 +6,10 @@ add_library(networking
     comms.h
     utils.h
     utils.c
+    certificates.h
+    certificates.c
+    web-utils.h
+    web-utils.c
 )
 
 # Include it

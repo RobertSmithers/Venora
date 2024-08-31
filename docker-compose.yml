@@ -45,6 +45,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./server:/srv
+      - ./SSL-share:/srv/SSL/
     ports:
       - 9393:9393
       - 9394:9394
