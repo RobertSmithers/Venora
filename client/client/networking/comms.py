@@ -4,6 +4,7 @@ Contains all networking functionality for the program
 
 import socket
 import logging
+import ssl
 from typing import Optional
 
 from client.config.settings import CHUNK_SIZE
@@ -26,10 +27,14 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
     """
     try:
         c_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # c_sock.settimeout(5)
-        c_sock.connect((server_ip, server_port))
 
-        return c_sock
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        ssl_sock = context.wrap_socket(
+            c_sock, server_hostname='VenoraServer')
+        # c_sock.settimeout(5)
+        ssl_sock.connect((server_ip, server_port))
+
+        return ssl_sock
     except (socket.error, TypeError) as e:
         logger.debug("Error connecting to the server: %s", e)
         return None
@@ -63,7 +68,7 @@ def recv_from_srv(sock: socket.socket, num_bytes: int = CHUNK_SIZE, verbose: boo
         return b''
 
 
-def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None:
+def send_to_srv(ssl_sock: socket.socket, data: bytes, verbose: bool = False) -> None:
     """
     Send a message to the server.
 
@@ -80,7 +85,7 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
 
     try:
         while total_sent < n:
-            bytes_sent = sock.send(data[total_sent:total_sent+CHUNK_SIZE])
+            bytes_sent = ssl_sock.send(data[total_sent:total_sent+CHUNK_SIZE])
 
             if bytes_sent == 0:
                 raise ConnectionError("Connection closed during send")
@@ -90,6 +95,7 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
         if verbose:
             # Output to logs and console
             logger.info("Sent: %d bytes of data\n%s", n, data)
-
+    except ssl.SSLError as e:
+        logger.error("Error sending SSL data to the server: %s", e)
     except socket.error as e:
         logger.error("Error sending data to the server: %s", e)
