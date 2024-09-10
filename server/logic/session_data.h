@@ -1,4 +1,6 @@
-#include <account.h>
+#include <openssl/ssl.h>
+
+#include "account.h"
 
 enum SessionState
 {
@@ -10,5 +12,6 @@ typedef struct SessionData_t
 {
     account *user;
     int socket;
+    SSL *ssl;
     enum SessionState state;
 } SessionData;

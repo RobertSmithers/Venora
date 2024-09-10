@@ -12,14 +12,15 @@ from client.networking.packer import (
 
 
 @pytest.mark.parametrize("data, expected_result", [
-    ({"username": "alice"},
-     b'\x00\x01\x00\x05alice'),
-    ({"username": "bob", "token": 1234},
-     b'\x00\x01\x00\x03bob'),
-    ({"username": "a" * USERNAME_MAX_CHARS},
+    ({"username": "alice", "password": "1234"},
+     b'\x00\x01\x00\x05alice\x00\x041234'),
+    ({"username": "bob", "password": "test"},
+     b'\x00\x01\x00\x03bob\x00\x04test'),
+    ({"username": "a" * USERNAME_MAX_CHARS, "password": "a" * 4},
      b'\x00\x01' + struct.pack(f'!H{USERNAME_MAX_CHARS}s',
                                USERNAME_MAX_CHARS,
                                ("a" * USERNAME_MAX_CHARS).encode())
+     + '\x00\x04aaaa'.encode(),
      ),
 ])
 def test_pack_type_register(data, expected_result):
@@ -31,9 +32,9 @@ def test_pack_type_register(data, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("data", [
-    ({"user": "alice"}),
-    ({"token": "bob"}),
+@ pytest.mark.parametrize("data", [
+    ({"username": "alice"}),
+    ({"password": "password"}),
 ])
 def test_pack_type_register_missing_field(data):
     """
@@ -44,7 +45,7 @@ def test_pack_type_register_missing_field(data):
     assert result is None
 
 
-@pytest.mark.parametrize("data", [
+@ pytest.mark.parametrize("data", [
     ({"username": "a" * (USERNAME_MAX_CHARS + 1)}),
     ({"username": "abc" * USERNAME_MAX_CHARS}),
 ])
@@ -57,10 +58,10 @@ def test_pack_type_register_username_too_large(data):
     assert result is None
 
 
-@pytest.mark.parametrize("data, expected_result", [
-    ({"username": "alice", "token": "abc123"},
+@ pytest.mark.parametrize("data, expected_result", [
+    ({"username": "alice", "password": "abc123"},
      b'\x00\x02\x00\x05alice\x00\06abc123'),
-    ({"username": "bob", "token": "xyz7890"},
+    ({"username": "bob", "password": "xyz7890"},
      b'\x00\x02\x00\x03bob\x00\x07xyz7890'),
 ])
 def test_pack_type_authenticate(data, expected_result):
@@ -68,7 +69,7 @@ def test_pack_type_authenticate(data, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("data", [
+@ pytest.mark.parametrize("data", [
     ({"username": "a" * (USERNAME_MAX_CHARS + 1), "token": "abc123"}),
     ({"username": "abc" * USERNAME_MAX_CHARS, "token": "abc123"}),
 ])
@@ -81,7 +82,7 @@ def test_pack_type_authenticate_username_too_large(data):
     assert result is None
 
 
-@pytest.mark.parametrize("data", [
+@ pytest.mark.parametrize("data", [
     ({"username": "alice"}),
     ({"token": "xyz7890"}),
 ])
@@ -94,7 +95,7 @@ def test_pack_type_authenticate_missing_field(data):
     assert result is None
 
 
-@pytest.mark.parametrize("response, expected_result", [
+@ pytest.mark.parametrize("response, expected_result", [
     (b'\x00\x01', ResponseType.SUCCESS),
     (b'\x00\x02', ResponseType.SUCCESS_DATA),
     (b'\x00\x03', ResponseType.FAILURE),
