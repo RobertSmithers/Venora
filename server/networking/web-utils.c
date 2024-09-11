@@ -123,7 +123,7 @@ struct json_object *http_get(const char *endpoint, json_object *json_data)
     if (curl)
     {
         // SSL required for all comms (CUZ WE LIKE THAT!)
-        init_ssl(curl);
+        init_ssl_to_db_api(curl);
 
         char url[256];
         sprintf(url, "%s%s", get_base_url(), endpoint);
@@ -186,7 +186,7 @@ struct json_object *http_post(const char *endpoint, json_object *json_data)
     if (curl)
     {
         // SSL required for all comms (cuz we like that)
-        init_ssl(curl);
+        init_ssl_to_db_api(curl);
 
         char url[256];
         sprintf(url, "%s%s", get_base_url(), endpoint);

@@ -30,7 +30,7 @@ def setup_logging(log_fname: str) -> None:  # logging.Logger:
 
         # Stdout/cmd handler
         stdout_handler = logging.StreamHandler()
-        stdout_handler.setLevel(logging.INFO)
+        stdout_handler.setLevel(logging.DEBUG)
         stdout_handler.setFormatter(cmd_formatter)
 
         # File handler

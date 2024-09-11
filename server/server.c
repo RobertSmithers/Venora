@@ -39,14 +39,16 @@ bool socket_closed(int sock)
     return false;
 }
 
-void handle_client(int sock)
+void handle_client(int sock) //, SSL *srv_ssl)
 {
     int c_sock = sock;
+    // SSL *ssl = srv_ssl;
 
     // Create session data
     SessionData *session = (SessionData *)malloc(sizeof(SessionData));
 
     session->socket = c_sock;
+    // session->ssl = ssl;
     session->user = (account *)malloc(sizeof(account));
     session->state = UNAUTHENTICATED;
 
@@ -89,6 +91,8 @@ void handle_client(int sock)
     printf("Free user\n");
     free(session->user);
 
+    // SSL_shutdown(ssl);
+    // SSL_free(ssl);
     close(sock);
 
     printf("Client disconnected.\n\n");
@@ -97,6 +101,10 @@ void handle_client(int sock)
 
 int main()
 {
+    int server_socket, client_socket;
+    struct sockaddr_in server_address, client_address;
+    socklen_t client_address_len = sizeof(client_address);
+
     setbuf(stdout, NULL);
     log_debug("I am a server. I am A SERVER. I am A SERVER. I AM A SERVER!\n");
 
@@ -108,13 +116,13 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    int server_socket,
-        client_socket;
     // This includes verifying SSL certs
     srand((unsigned int)time(NULL)); // Used for token generation
 
-    struct sockaddr_in server_address, client_address;
-    socklen_t client_address_len = sizeof(client_address);
+    // Initialize SSL for client connections
+    // init_ssl_to_clients();
+    // SSL_CTX *ctx = create_context();
+    // configure_context(ctx);
 
     if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
@@ -140,10 +148,11 @@ int main()
     if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) == -1)
     {
         perror("Socket bind failed");
+        close(server_socket);
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server_socket, 5) == -1)
+    if (listen(server_socket, 1) == -1)
     {
         perror("Socket listen failed");
         exit(EXIT_FAILURE);
@@ -155,20 +164,40 @@ int main()
     while (1)
     {
         // TODO: Store socket: ip map in shared memory to prevent multiple connections from same IP
-        if ((client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len)) == -1)
+        int client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len);
+        if (client_socket < 0)
         {
-            perror("Socket accept failed");
+            perror("Accept failed");
             continue;
         }
+
+        // SSL *ssl = SSL_new(ctx);
+        // SSL_set_fd(ssl, client_socket);
+
+        // if (SSL_accept(ssl) <= 0)
+        // {
+        //     ERR_print_errors_fp(stderr);
+        // }
+        // else
+        // {
 
         printf("Client connected: %s\n", inet_ntoa(client_address.sin_addr));
         client_count++;
         printf("TODO: Thread out to handle_client\n\n");
-        handle_client(client_socket);
+        handle_client(client_socket); //, ssl);
+        // SSL_read(ssl, buf, sizeof(buf));
+        // printf("Received: %s\n", buf);
+
+        // Respond to the client
+        // const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
+        // SSL_write(ssl, response, strlen(response));
+        // }
     }
 
     // Close the server socket
     close(server_socket);
+    // SSL_CTX_free(ctx);
+    // cleanup_openssl();
 
     return 0;
 }

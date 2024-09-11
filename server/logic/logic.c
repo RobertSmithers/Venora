@@ -91,6 +91,8 @@ void handle_registration(SessionData *session)
         printf("Sending token %s\n", token);
         // Send token back to user... user is now logged in
         session->state = AUTHENTICATED;
+        session->user->username = req_username;
+        session->user->token = token;
         DataBlock block;
         block.data = token;
         block.size = strlen(token);

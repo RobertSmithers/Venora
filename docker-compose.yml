@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./server:/srv
-      - ./SSL-share:/srv/SSL/
+      - ./SSL/db-accessor-api/:/srv/SSL/db-accessor-api/
     ports:
       - 9393:9393
       - 9394:9394
@@ -65,6 +65,8 @@ services:
     # depends_on:
     #   - server
     stdin_open: true
+    volumes:
+      - ./SSL/server/:/client/SSL/server/
     tty: true
     networks:
       - isolated

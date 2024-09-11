@@ -4,6 +4,7 @@ Contains all networking functionality for the program
 
 import socket
 import logging
+import ssl
 from typing import Optional
 
 from client.config.settings import CHUNK_SIZE
@@ -26,12 +27,30 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
     """
     try:
         c_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+
+        # Disable older versions of SSL/TLS
+        # context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
+        # context.minimum_version = ssl.TLSVersion.TLSv1_2
+
+        # Add server's self-signed cert
+        # context.load_verify_locations('/client/SSL/server/server.crt')
+
+        # ssl_sock = context.wrap_socket(
+        #     c_sock, server_hostname='VenoraServer')
         # c_sock.settimeout(5)
         c_sock.connect((server_ip, server_port))
 
         return c_sock
     except (socket.error, TypeError) as e:
-        logger.debug("Error connecting to the server: %s", e)
+        logger.debug("Socket error while connecting to the server: %s", e)
+        return None
+    except ssl.SSLError as e:
+        logger.debug("SSL error while connecting to the server: %s", e)
+        return None
+    except Exception as e:
+        logger.debug("Other error while connecting to the server: %s", e)
         return None
 
 
@@ -57,8 +76,12 @@ def recv_from_srv(sock: socket.socket, num_bytes: int = CHUNK_SIZE, verbose: boo
             logger.debug("Received: %s", data)
         return data
 
+    except ssl.SSLError as e:
+        # Handle receiving SSL errors
+        logger.debug("Error receiving SSL data from the server: %s", e)
+        return
     except socket.error as e:
-        # Handle receiving errors
+        # Handle receiving socket errors
         logger.debug("Error receiving data from the server: %s", e)
         return b''
 
@@ -90,6 +113,7 @@ def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None
         if verbose:
             # Output to logs and console
             logger.info("Sent: %d bytes of data\n%s", n, data)
-
+    except ssl.SSLError as e:
+        logger.error("Error sending SSL data to the server: %s", e)
     except socket.error as e:
         logger.error("Error sending data to the server: %s", e)
