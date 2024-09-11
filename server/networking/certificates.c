@@ -7,7 +7,7 @@ void init_ssl_to_db_api(CURL *curl)
 {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
-    curl_easy_setopt(curl, CURLOPT_CAINFO, "/usr/local/share/ca-certificates/db-accessor-api.crt");
+    curl_easy_setopt(curl, CURLOPT_CAINFO, "/srv/SSL/db-accessor-api/db-accessor-api.crt");
     // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     // TODO: Add client cert as well
@@ -56,7 +56,9 @@ SSL_CTX *create_context()
     const SSL_METHOD *method;
     SSL_CTX *ctx;
 
-    method = SSLv23_server_method();
+    // method = SSLv23_server_method();
+    method = TLS_server_method();
+    printf("Created context with TLS\n");
 
     ctx = SSL_CTX_new(method);
     if (!ctx)
@@ -66,11 +68,14 @@ SSL_CTX *create_context()
         exit(EXIT_FAILURE);
     }
 
+    SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+
     return ctx;
 }
 
 void configure_context(SSL_CTX *ctx)
 {
-    SSL_CTX_use_certificate_file(ctx, "/path/to/your/certificate.crt", SSL_FILETYPE_PEM);
-    SSL_CTX_use_PrivateKey_file(ctx, "/path/to/your/private.key", SSL_FILETYPE_PEM);
+    SSL_CTX_use_certificate_file(ctx, "/srv/SSL/server.crt", SSL_FILETYPE_PEM);
+    SSL_CTX_use_PrivateKey_file(ctx, "/srv/SSL/server.key", SSL_FILETYPE_PEM);
 }
