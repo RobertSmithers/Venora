@@ -28,39 +28,33 @@ def connect_to_server(server_ip: str, server_port: int) -> Optional[socket.socke
     try:
         c_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        # context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
 
         # Disable older versions of SSL/TLS
-        context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
-        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        # context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
+        # context.minimum_version = ssl.TLSVersion.TLSv1_2
 
         # Add server's self-signed cert
-        context.load_verify_locations('/client/SSL/server/server.crt')
+        # context.load_verify_locations('/client/SSL/server/server.crt')
 
-        ssl_sock = context.wrap_socket(
-            c_sock, server_hostname='VenoraServer')
+        # ssl_sock = context.wrap_socket(
+        #     c_sock, server_hostname='VenoraServer')
         # c_sock.settimeout(5)
-        print("Doing a connection")
-        ssl_sock.connect((server_ip, server_port))
-        logging.info("Connected to Venora Server (%s:%d)",
-                     server_ip, server_port)
+        c_sock.connect((server_ip, server_port))
 
-        return ssl_sock
+        return c_sock
     except (socket.error, TypeError) as e:
-        print("hah!", e)
         logger.debug("Socket error while connecting to the server: %s", e)
         return None
     except ssl.SSLError as e:
-        print("hah!", e)
         logger.debug("SSL error while connecting to the server: %s", e)
         return None
     except Exception as e:
-        print("hah!", e)
         logger.debug("Other error while connecting to the server: %s", e)
         return None
 
 
-def recv_from_srv(ssl_sock: ssl.SSLSocket, num_bytes: int = CHUNK_SIZE, verbose: bool = False) -> bytes:
+def recv_from_srv(sock: socket.socket, num_bytes: int = CHUNK_SIZE, verbose: bool = False) -> bytes:
     """
     Receive a message from Venora server.
 
@@ -72,7 +66,7 @@ def recv_from_srv(ssl_sock: ssl.SSLSocket, num_bytes: int = CHUNK_SIZE, verbose:
         bytes: The raw response received in bytes.
     """
     try:
-        data = ssl_sock.recv(num_bytes)
+        data = sock.recv(num_bytes)
 
         if not data:
             raise socket.error("Connection closed by the server.")
@@ -92,7 +86,7 @@ def recv_from_srv(ssl_sock: ssl.SSLSocket, num_bytes: int = CHUNK_SIZE, verbose:
         return b''
 
 
-def send_to_srv(ssl_sock: ssl.SSLSocket, data: bytes, verbose: bool = False) -> None:
+def send_to_srv(sock: socket.socket, data: bytes, verbose: bool = False) -> None:
     """
     Send a message to the server.
 
@@ -109,7 +103,7 @@ def send_to_srv(ssl_sock: ssl.SSLSocket, data: bytes, verbose: bool = False) -> 
 
     try:
         while total_sent < n:
-            bytes_sent = ssl_sock.send(data[total_sent:total_sent+CHUNK_SIZE])
+            bytes_sent = sock.send(data[total_sent:total_sent+CHUNK_SIZE])
 
             if bytes_sent == 0:
                 raise ConnectionError("Connection closed during send")

@@ -39,16 +39,16 @@ bool socket_closed(int sock)
     return false;
 }
 
-void handle_client(int sock, SSL *srv_ssl)
+void handle_client(int sock) //, SSL *srv_ssl)
 {
     int c_sock = sock;
-    SSL *ssl = srv_ssl;
+    // SSL *ssl = srv_ssl;
 
     // Create session data
     SessionData *session = (SessionData *)malloc(sizeof(SessionData));
 
     session->socket = c_sock;
-    session->ssl = ssl;
+    // session->ssl = ssl;
     session->user = (account *)malloc(sizeof(account));
     session->state = UNAUTHENTICATED;
 
@@ -91,8 +91,8 @@ void handle_client(int sock, SSL *srv_ssl)
     printf("Free user\n");
     free(session->user);
 
-    SSL_shutdown(ssl);
-    SSL_free(ssl);
+    // SSL_shutdown(ssl);
+    // SSL_free(ssl);
     close(sock);
 
     printf("Client disconnected.\n\n");
@@ -120,9 +120,9 @@ int main()
     srand((unsigned int)time(NULL)); // Used for token generation
 
     // Initialize SSL for client connections
-    init_ssl_to_clients();
-    SSL_CTX *ctx = create_context();
-    configure_context(ctx);
+    // init_ssl_to_clients();
+    // SSL_CTX *ctx = create_context();
+    // configure_context(ctx);
 
     if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
@@ -171,33 +171,33 @@ int main()
             continue;
         }
 
-        SSL *ssl = SSL_new(ctx);
-        SSL_set_fd(ssl, client_socket);
+        // SSL *ssl = SSL_new(ctx);
+        // SSL_set_fd(ssl, client_socket);
 
-        if (SSL_accept(ssl) <= 0)
-        {
-            ERR_print_errors_fp(stderr);
-        }
-        else
-        {
+        // if (SSL_accept(ssl) <= 0)
+        // {
+        //     ERR_print_errors_fp(stderr);
+        // }
+        // else
+        // {
 
-            printf("Client connected: %s\n", inet_ntoa(client_address.sin_addr));
-            client_count++;
-            printf("TODO: Thread out to handle_client\n\n");
-            handle_client(client_socket, ssl);
-            // SSL_read(ssl, buf, sizeof(buf));
-            // printf("Received: %s\n", buf);
+        printf("Client connected: %s\n", inet_ntoa(client_address.sin_addr));
+        client_count++;
+        printf("TODO: Thread out to handle_client\n\n");
+        handle_client(client_socket); //, ssl);
+        // SSL_read(ssl, buf, sizeof(buf));
+        // printf("Received: %s\n", buf);
 
-            // Respond to the client
-            // const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
-            // SSL_write(ssl, response, strlen(response));
-        }
+        // Respond to the client
+        // const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
+        // SSL_write(ssl, response, strlen(response));
+        // }
     }
 
     // Close the server socket
     close(server_socket);
-    SSL_CTX_free(ctx);
-    cleanup_openssl();
+    // SSL_CTX_free(ctx);
+    // cleanup_openssl();
 
     return 0;
 }
