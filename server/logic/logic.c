@@ -104,9 +104,9 @@ void handle_registration(SessionData *session)
         char msg[40 + username_len];
         sprintf(msg, "Failed to register. Username %s is taken.", req_username);
         send_response_failure(session->socket, msg);
+        free(req_username);
+        free(token);
     }
-    free(req_username);
-    free(token);
 }
 
 void handle_login(SessionData *session)

@@ -139,7 +139,7 @@ struct json_object *http_get(const char *endpoint, json_object *json_data)
         char *full_url = malloc(strlen(url) + strlen(json_str) + 2);
         sprintf(full_url, "%s?%s", url, json_str);
         curl_easy_setopt(curl, CURLOPT_URL, full_url);
-        printf("http_get -- %s", full_url);
+        printf("http_get -- %s\n", full_url);
 
         curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
         // curl_easy_setopt(curl, CURLOPT_GETFIELDS, json_str);

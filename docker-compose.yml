@@ -53,6 +53,7 @@ services:
       - db-accessor-api
     networks:
       - isolated
+    hostname: "server"
     cap_add:
       - SYS_PTRACE
     security_opt:
