@@ -1,8 +1,11 @@
 /* Global Styles */
-body {
+html,
+body,
+#root {
   margin: 0;
   font-family: "Arial", sans-serif;
   height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -20,15 +23,17 @@ body {
 
 .App-header {
   display: flex;
-  justify-content: space-between; /* Aligns title and form side by side */
+  justify-content: space-around; /* Space around to avoid pushing form */
   align-items: center;
-  width: 80%;
-  max-width: 1200px;
+  width: 90%;
+  max-width: 1400px;
+  height: 100%; /* Ensure both elements stay centered */
 }
 
 /* Title Container */
 .title-container {
   flex: 1;
+  min-width: 300px; /* Fix width for title to avoid pushing form */
 }
 
 .app-title {
@@ -38,8 +43,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   border-right: 2px solid #2c9adf;
-  width: 0;
-  animation: typing 4s steps(15), blink 0.75s step-end infinite;
+  animation: typing 4s steps(15) 1 normal both, blink 0.75s step-end infinite;
 }
 
 @keyframes typing {
@@ -68,9 +72,10 @@ body {
   padding: 40px 60px;
   border-radius: 10px;
   box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.2);
-  transition: transform 0.6s ease-in-out;
-  max-width: 400px;
+  max-width: 500px; /* Increase width of form */
   width: 100%;
+  margin: 0 auto;
+  transition: transform 0.6s ease-in-out;
 }
 
 /* Fix alignment issue by centering form content */
@@ -78,6 +83,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%; /* Full width for proper alignment */
 }
 
 .auth-form h2 {
@@ -137,12 +143,5 @@ input[type="password"]:focus {
 }
 
 .toggle-btn:hover {
-  color: #fff;
-}
-
-/* Dark mode improvements */
-.auth-form h2,
-.auth-form input,
-.auth-form button {
   color: #fff;
 }

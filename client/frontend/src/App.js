@@ -1,34 +1,32 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./App.css";
+import Typewriter from "./components/Typewriter";
 
 function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
-  const [title, setTitle] = useState("");
   const appTitle = "Venora";
-  const appSubtitle = "Dotcom Offensive Security Suite";
 
-  useEffect(() => {
-    let i = 0;
-    const typingInterval = setInterval(() => {
-      if (i < appTitle.length) {
-        setTitle((prev) => prev + appTitle[i]);
-        i++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 150);
-    return () => clearInterval(typingInterval);
-  }, []);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Username:", username);
-    console.log("Password:", password);
-    if (isSignUp) {
-      console.log("Confirm Password:", confirmPassword);
+    // fetch("http://127.0.0.1:5000/register", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ username, password }),
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => console.log(data))
+    //   .catch((error) => console.error("Error:", error));
+    try {
+      const response = await axios.post("/register", { username, password });
+      console.log("Registration success:", response.data);
+    } catch (error) {
+      console.error("Error during registration:", error);
     }
   };
 
@@ -36,7 +34,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div className="title-container">
-          <h1 className="app-title">{title}</h1>
+          <h1 className="app-title">
+            <Typewriter text={appTitle} delay={500} />
+          </h1>
         </div>
         <div className={`form-container ${isSignUp ? "signup-mode" : ""}`}>
           <form className="auth-form" onSubmit={handleSubmit}>

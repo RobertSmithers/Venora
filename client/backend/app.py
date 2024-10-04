@@ -13,6 +13,7 @@ Note: This docstring only provides a high-level overview of the file and its pur
 """
 
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from functools import wraps
 
@@ -27,6 +28,7 @@ from client.logic.actions import (
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+CORS(app, resources={r"/*": {"origins": "*"}})
 jwt = JWTManager(app)
 
 # Initialize the connection pool
@@ -118,5 +120,22 @@ def login():
         return jsonify({"status": "failure", "error": str(e)}), 500
 
 
+@app.route('/some_protected_action', methods=['POST'])
+@is_connected
+@jwt_required()
+def some_protected_action():
+    user_id = get_jwt_identity()
+    conn = get_connection(user_id)
+
+    try:
+        # Perform some action using the connection
+        # Example: send_action_request(conn, action_data)
+        # response = receive_action_response(conn)
+        return jsonify({"status": "success", "data": "Action performed"})
+    except (socket.error, Exception) as e:
+        handle_disconnect(user_id)
+        return jsonify({"status": "failure", "error": str(e)}), 500
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
