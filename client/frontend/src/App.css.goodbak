@@ -1,0 +1,133 @@
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: "Arial", sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: linear-gradient(135deg, #f3ec78, #af4261);
+   */
+  background-image: url("assets/login/background.jfif");
+  background-size: cover;
+}
+
+.App {
+  text-align: center;
+  width: 100%;
+}
+
+.App-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.form-container {
+  background: #fff;
+  padding: 40px 60px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.2);
+  transition: transform 0.6s ease-in-out;
+  max-width: 400px;
+  width: 100%;
+}
+
+.signup-mode {
+  transform: translateY(-20px);
+}
+
+/* Form Styling */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form h2 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #af4261;
+}
+
+/* Button Styles */
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-size: 1em;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.primary-btn {
+  background-color: #af4261;
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: #f3ec78;
+  color: #af4261;
+}
+
+.toggle-btn {
+  background-color: transparent;
+  color: #333;
+}
+
+.toggle-btn:hover {
+  color: #af4261;
+}
+
+/* Animations */
+.auth-form h2 {
+  animation: fadeIn 1s ease;
+}
+
+input[type="text"],
+input[type="password"] {
+  animation: slideUp 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
