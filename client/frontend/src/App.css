@@ -92,6 +92,11 @@ body,
   color: #2c9adf;
 }
 
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
 .input-container {
   position: relative;
   margin-bottom: 25px;

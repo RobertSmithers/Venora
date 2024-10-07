@@ -1,92 +1,65 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import CssBaseline from "@mui/material/CssBaseline";
+
 import axios from "axios";
-import "./App.css";
-import Typewriter from "./components/Typewriter";
+import Cookies from "js-cookie";
+import { v4 as uuidv4 } from "uuid";
 
-function App() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
-  const appTitle = "Venora";
+import SignInPage from "layouts/pages/authentication/sign-in";
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // fetch("http://127.0.0.1:5000/register", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ username, password }),
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => console.log(data))
-    //   .catch((error) => console.error("Error:", error));
+export default function App() {
+  const [isConnected, setIsConnected] = useState(true); // Track connection status to the server
+  const { pathname } = useLocation();
+
+  const checkConnection = async () => {
     try {
-      const response = await axios.post("/register", { username, password });
-      console.log("Registration success:", response.data);
+      let userId = Cookies.get("userId");
+      if (!userId) {
+        userId = uuidv4();
+        Cookies.set("userId", userId);
+      }
+
+      console.log("User ID is:", userId);
+
+      await axios.post(
+        "/connect",
+        {},
+        {
+          headers: {
+            "X-User-Id": userId,
+          },
+        }
+      ); // Connect to the server
+
+      setIsConnected(true);
+      return true;
     } catch (error) {
-      console.error("Error during registration:", error);
+      console.error("Connection failed:", error);
+      setIsConnected(false);
+      return false;
     }
   };
 
+  // Setting page scroll to 0 when changing the route
+  useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.scrollingElement.scrollTop = 0;
+    checkConnection();
+  }, [pathname]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <div className="title-container">
-          <h1 className="app-title">
-            <Typewriter text={appTitle} delay={500} />
-          </h1>
-        </div>
-        <div className={`form-container ${isSignUp ? "signup-mode" : ""}`}>
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <h2>{isSignUp ? "Sign Up" : "Login"}</h2>
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {isSignUp && (
-              <div className="input-container">
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-            <button type="submit" className="btn primary-btn">
-              {isSignUp ? "Register" : "Login"}
-            </button>
-            <button
-              type="button"
-              className="btn toggle-btn"
-              onClick={() => setIsSignUp(!isSignUp)}
-            >
-              {isSignUp
-                ? "Already have an account? Login"
-                : "Don't have an account? Sign Up"}
-            </button>
-          </form>
-        </div>
-      </header>
-    </div>
+    <>
+      <CssBaseline />
+      <Routes>
+        {/* {getRoutes(routes)} */}
+        <Route
+          path="/SignIn"
+          element={<SignInPage isConnected={isConnected} connectFunction={checkConnection} />}
+        />
+        <Route path="*" element={<Navigate to="/SignIn" />} />
+      </Routes>
+    </>
   );
 }
-
-export default App;

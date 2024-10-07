@@ -1,0 +1,170 @@
+/* Global Styles */
+html,
+body,
+#root {
+  margin: 0;
+  font-family: "Arial", sans-serif;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #102543; /* Dark background color */
+  background-image: url("assets/images/sign-in-bg-2.jpg");
+  background-size: cover;
+}
+
+.App {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.App-header {
+  display: flex;
+  justify-content: space-around; /* Space around to avoid pushing form */
+  align-items: center;
+  width: 90%;
+  max-width: 1400px;
+  height: 100%; /* Ensure both elements stay centered */
+}
+
+/* Title Container */
+.title-container {
+  flex: 1;
+  min-width: 300px; /* Fix width for title to avoid pushing form */
+}
+
+.app-title {
+  font-size: 3em;
+  color: #c9cfd3;
+  font-family: "Courier New", Courier, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid #2c9adf;
+  animation:
+    typing 4s steps(15) 1 normal both,
+    blink 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #2c9adf;
+  }
+}
+
+/* Form Container */
+.form-container {
+  flex: 1;
+  background-color: transparent; /* Darker background for form */
+  padding: 40px 60px;
+  border: 3px solid rgba(100, 100, 100, 0.5);
+  border-radius: 10px;
+  backdrop-filter: blur(30px);
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 500px; /* Increase width of form */
+  width: 100%;
+  margin: 0 auto;
+  transition: transform 0.6s ease-in-out;
+}
+
+/* Fix alignment issue by centering form content */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Full width for proper alignment */
+  opacity: 100%;
+}
+
+.auth-form h2 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #f4f4f4;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ffffff9c;
+  border-radius: 5px;
+  outline: none;
+  background-color: transparent;
+  color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+  color: rgba(255, 255, 255, 0.526);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #2c9adf;
+}
+
+.btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-size: 1em;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+  width: 100%; /* Ensure buttons are full-width */
+}
+
+.primary-btn {
+  background-color: #2c9adf;
+  color: rgb(255, 255, 255);
+}
+
+.primary-btn:hover {
+  background-color: #3da5e6;
+  /* color: #2c9adf; */
+  /* border: 2px solid #2c9adf; */
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-btn {
+  background-color: transparent;
+  color: #bebebe;
+}
+
+.toggle-btn:hover {
+  color: #fff;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}

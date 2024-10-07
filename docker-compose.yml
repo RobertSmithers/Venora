@@ -53,7 +53,7 @@ services:
       - db-accessor-api
     networks:
       - isolated
-    hostname: "server"
+    hostname: "venora-server"
     cap_add:
       - SYS_PTRACE
     security_opt:

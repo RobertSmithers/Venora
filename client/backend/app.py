@@ -15,6 +15,7 @@ Note: This docstring only provides a high-level overview of the file and its pur
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from functools import wraps
 
 import os
@@ -35,9 +36,11 @@ jwt = JWTManager(app)
 connections = {}
 
 
-def get_connection(user_id):
+def get_server_connection(user_id):
     if user_id not in connections:
-        connections[user_id] = connect_to_server()
+        # TODO: Setup the network to propogate hostname to the client backend (here)
+        connections[user_id] = connect_to_server(
+            '127.0.0.1', 9393)  # ('venora-server', 9393)
     return connections[user_id]
 
 
@@ -55,8 +58,10 @@ def is_connected(fn):
             verify_jwt_in_request()
             user_id = get_jwt_identity()
             if user_id not in connections:
-                return jsonify({"status": "failure", "error": "Not connected to Venora server"}), 401
+                return jsonify({"status": "failure", "error": "No longer connected to Venora server"}), 401
             return fn(*args, **kwargs)
+        except NoAuthorizationError:
+            return jsonify({"status": "failure", "error": "Not connected to Venora server"}), 401
         except Exception as e:
             return jsonify({"status": "failure", "error": str(e)}), 500
     return wrapper
@@ -65,25 +70,29 @@ def is_connected(fn):
 @app.route('/connect', methods=['POST'])
 def connect():
     '''This is the very first endpoint that should be called by the frontend to establish a connection with the server.'''
-    user_data = request.json
-    user_id = user_data['username']
+    user_id = request.headers.get('X-User-Id')
+
+    if not user_id:
+        return jsonify({"status": "failure", "error": "User ID not provided"}), 400
 
     # Check if user already is connect
     if connections.get(user_id):
         return jsonify({"status": "success", "data": "Already connected"}), 200
 
     # Connect and store the connection
-    get_connection(user_id)
-    access_token = create_access_token(identity=user_id)
+    get_server_connection(user_id)
+    access_token = create_access_token(
+        identity=user_id, additional_claims={"connected": True})
     return jsonify(access_token=access_token), 200
 
 
 @app.route('/register', methods=['POST'])
 @is_connected
 def register():
+    print("I guess user is connected *shrug*")
     user_data = request.json
     user_id = user_data['username']
-    conn = get_connection(user_id)
+    conn = get_server_connection(user_id)
 
     try:
         # TODO: Bring over logic from cmd.py
@@ -102,7 +111,7 @@ def register():
 def login():
     user_data = request.json
     user_id = user_data['username']
-    conn = get_connection(user_id)
+    conn = get_server_connection(user_id)
 
     try:
         # TODO: Bring over logic from cmd.py
@@ -125,7 +134,7 @@ def login():
 @jwt_required()
 def some_protected_action():
     user_id = get_jwt_identity()
-    conn = get_connection(user_id)
+    conn = get_server_connection(user_id)
 
     try:
         # Perform some action using the connection
