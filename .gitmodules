@@ -1,0 +1,18 @@
+[submodule "db-accessor-api"]
+	path = db-accessor-api
+	url = git@github.com:RobertSmithers/Venora-DB-API.git
+[submodule "db"]
+	path = db
+	url = git@github.com:RobertSmithers/Venora-DB.git
+[submodule "server"]
+	path = server
+	url = git@github.com:RobertSmithers/Venora-Server.git
+[submodule "client/frontend"]
+	path = client/frontend
+	url = git@github.com:RobertSmithers/Venora-Client-Frontend.git
+[submodule "client/backend"]
+	path = client/backend
+	url = git@github.com:RobertSmithers/Venora-Client-Backend.git
+[submodule "client/library"]
+	path = client/library
+	url = git@github.com:RobertSmithers/Venora-Client-Library.git

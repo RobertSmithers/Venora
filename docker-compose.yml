@@ -23,6 +23,21 @@ services:
       - isolated
     hostname: db
 
+  db-accessor-api:
+    build: ./db-accessor-api
+    environment:
+      FLASK_ENV: development
+    env_file: ./db/db.env
+    secrets:
+      - db-password
+    depends_on:
+      - db
+    networks:
+      - isolated
+    ports:
+      - "5000:80"
+    hostname: "db-accessor"
+
   server: &server
     env_file: "./server/server.env"
     build:
@@ -30,14 +45,15 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./server:/srv
-      # - ./.vscode/launch.json:/srv/.vscode/launch.json
+      - ./SSL/db-accessor-api/:/srv/SSL/db-accessor-api/
     ports:
       - 9393:9393
       - 9394:9394
     depends_on:
-      - db
+      - db-accessor-api
     networks:
       - isolated
+    hostname: "venora-server"
     cap_add:
       - SYS_PTRACE
     security_opt:
@@ -50,6 +66,8 @@ services:
     # depends_on:
     #   - server
     stdin_open: true
+    volumes:
+      - ./SSL/server/:/client/SSL/server/
     tty: true
     networks:
       - isolated
@@ -58,7 +76,7 @@ volumes:
   pgdata:
 secrets:
   db-password:
-    file: db/secrets/password.txt
+    file: ./db/secrets/password.txt
 
 # Until I figure out a way to automate this connection a little better (maybe hostname instead of IP for connect?)
 # To view network for container IPs (for connections)
