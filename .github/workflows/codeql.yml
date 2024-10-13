@@ -35,6 +35,12 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev \
+            cmake build-essential liblog4c-dev
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
