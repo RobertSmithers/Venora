@@ -35,7 +35,7 @@ services:
     networks:
       - isolated
     ports:
-      - "5000:80"
+      - "5001:80"
     hostname: "db-accessor"
 
   server: &server
@@ -60,23 +60,57 @@ services:
       - seccomp:unconfined
     # restart: always
 
-  # docker-compose run --rm -i -t client
-  client:
-    build: client/
-    # depends_on:
-    #   - server
-    stdin_open: true
+  # docker build --build-arg SUBMODULE_ACCESS_TOKEN=${{ secrets.SUBMODULE_ACCESS_TOKEN }}
+  client-backend:
+    build:
+      context: client/ # Needs access to client/backend/ and client/library/
+      dockerfile: ./backend/Dockerfile
+    # environment:
+    # SUBMODULE_ACCESS_TOKEN: /run/secrets/submodule_access_token
+    # FLASK_ENV: production
+    #   FLASK_APP: backend/app.py
+    #   DATABASE_URL: postgres:// [username]:[password]@db:5432/[database]
     volumes:
       - ./SSL/server/:/client/SSL/server/
-    tty: true
+      # - ./client/backend:/app/backend
+      # - ./client/library:/app/library
+    secrets:
+      - submodule_access_token
+    ports:
+      - "5000:5000"
     networks:
       - isolated
+    # depends_on:
+    # - server
+
+  client-frontend:
+    build: ./client/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - client-backend
+    networks:
+      - isolated
+
+  # docker-compose run --rm -i -t client
+  # client:
+  #   build: client/
+  #   # depends_on:
+  #   #   - server
+  #   stdin_open: true
+  #   volumes:
+  #     - ./SSL/server/:/client/SSL/server/
+  #   tty: true
+  #   networks:
+  #     - isolated
 
 volumes:
   pgdata:
 secrets:
   db-password:
     file: ./db/secrets/password.txt
+  submodule_access_token:
+    file: ./secrets/submodule_access_token.txt
 
 # Until I figure out a way to automate this connection a little better (maybe hostname instead of IP for connect?)
 # To view network for container IPs (for connections)
