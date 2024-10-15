@@ -79,18 +79,29 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - isolated
+      - venora
+      # - isolated
     # depends_on:
     # - server
 
   client-frontend:
-    build: ./client/frontend
+    build:
+      context: ./client/frontend
+      target: dev
     ports:
       - "80:80"
+      - "3000:3000"
+    volumes:
+      - ./client/frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - client-backend
     networks:
-      - isolated
+      - venora
+      # - isolated
+    stdin_open: true
 
   # docker-compose run --rm -i -t client
   # client:
@@ -117,4 +128,6 @@ secrets:
 # docker inspect venora_isolated
 networks:
   isolated:
+    driver: bridge
+  venora:
     driver: bridge
