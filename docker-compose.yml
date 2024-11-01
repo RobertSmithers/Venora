@@ -20,7 +20,7 @@ services:
       timeout: 10s
       retries: 5
     networks:
-      - isolated
+      - venora
     hostname: db
 
   db-accessor-api:
@@ -33,7 +33,7 @@ services:
     depends_on:
       - db
     networks:
-      - isolated
+      - venora
     ports:
       - "5001:80"
     hostname: "db-accessor"
@@ -52,7 +52,7 @@ services:
     depends_on:
       - db-accessor-api
     networks:
-      - isolated
+      - venora
     hostname: "venora-server"
     cap_add:
       - SYS_PTRACE
