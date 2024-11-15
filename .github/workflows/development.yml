@@ -70,4 +70,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest
+          pytest client/library/tests/unit/ --cov=client/library/ --cov-report=xml
