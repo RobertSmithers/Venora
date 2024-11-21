@@ -9,6 +9,14 @@ Disclaimer: The software provided here is for educational purposes only. Any use
 
 ## Usage
 
-tty1: `docker-compose up server`
+First: `docker-compose build`
 
-tty2: `docker-compose run --rm -it client`
+<br>
+Then open a couple of terminals
+<br>
+
+tty1: `docker-compose up server`
+This will load the server's dependent services (db, db-accessor-api)
+
+tty2: `docker-compose up client-frontend`
+This will also load all dependent services (client-backend)
