@@ -72,7 +72,7 @@ services:
     #   DATABASE_URL: postgres:// [username]:[password]@db:5432/[database]
     volumes:
       - ./SSL/server/:/client/SSL/server/
-      # - ./client/backend:/app/backend
+      - ./client/backend:/app/backend # Volume is just for development, hot reload
       # - ./client/library:/app/library
     secrets:
       - submodule_access_token
