@@ -20,3 +20,47 @@ This will load the server's dependent services (db, db-accessor-api)
 
 tty2: `docker-compose up client-frontend`
 This will also load all dependent services (client-backend)
+
+## Architecture
+
+### Frontend (React)
+
+- Establish WebSocket connection to Web Backend API.
+- Receive real-time updates (target status, connectivity).
+- Send user commands to update or act on targets.
+
+### Web Backend API (Flask)
+
+- Manages WebSocket connections for clients.
+- Maintains dedicated TCP socket connections to the app server.
+- Uses Redis to:
+  - Cache WebSocket-to-TCP socket mappings.
+  - Cache target statuses for periodic database writes.
+  - Publish/subscribe to messages for efficient inter-component communication.
+- Pushes updates to WebSocket clients when the app server sends status changes.
+
+### App Server (C)
+
+- Communicates with targets.
+- Publishes connectivity or state changes to Redis.
+- Subscribes to commands from the Web Backend API (e.g., via Redis Pub/Sub).
+
+### Redis
+
+- Stores WebSocket-to-TCP socket mappings for routing.
+- Caches frequently updated target statuses.
+- Acts as a Pub/Sub broker between the Web Backend API and the App Server.
+
+### Database Backend API (Flask)
+
+- Periodically syncs Redis caches to the Postgres database using Celery tasks.
+
+### Celery
+
+- Performs background tasks, such as flushing Redis caches to the database or handling long-running jobs.
+
+## Summary
+
+Venora utilizes a modern tech stack to provide a robust and scalable solution for active exploitation testing. The frontend is built with React, ensuring a dynamic and responsive user interface. The backend leverages Flask for the web API, with JWT-extended for secure authentication, SocketIO for real-time communication, Celery for task scheduling, and Redis for efficient caching. The app server is powered by Crver and json-c, with SSL for secure connections. The database API is implemented using Python Flask and JWT, with Redis for caching, and the primary database is Postgres, known for its reliability and performance.
+
+![Tech Stack](path/to/tech-stack-image.png)
