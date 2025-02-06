@@ -63,4 +63,4 @@ This will also load all dependent services (client-backend)
 
 Venora utilizes a modern tech stack to provide a robust and scalable solution for active exploitation testing. The frontend is built with React, ensuring a dynamic and responsive user interface. The backend leverages Flask for the web API, with JWT-extended for secure authentication, SocketIO for real-time communication, Celery for task scheduling, and Redis for efficient caching. The app server is powered by Crver and json-c, with SSL for secure connections. The database API is implemented using Python Flask and JWT, with Redis for caching, and the primary database is Postgres, known for its reliability and performance.
 
-![Tech Stack](path/to/tech-stack-image.png)
+<!-- ![Tech Stack](assets/images/VenoraTechStack.png) -->
